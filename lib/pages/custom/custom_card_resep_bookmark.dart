@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:resepin/pages/detail_resep_page.dart';
 import 'package:resepin/theme/appColors.dart';
 
 class CustomCardResepBookmark extends StatelessWidget {
@@ -8,6 +10,9 @@ class CustomCardResepBookmark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: () {
+        Get.to(DetailResepPage());
+      },
       child: Container(
         height: 200, // Add fixed height to prevent unbounded constraints
         decoration: BoxDecoration(

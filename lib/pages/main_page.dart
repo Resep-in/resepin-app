@@ -26,8 +26,8 @@ class MainPage extends StatelessWidget {
       PersistentTabConfig(
         screen: ScanPage(),
         item: ItemConfig(
-          icon: Icon(Icons.chat_rounded),
-          title: 'Chef AI',
+          icon: Icon(Icons.camera_alt),
+          title: 'Scan',
           iconSize: 32,
           activeColorSecondary: AppColors.primary,
           activeForegroundColor: AppColors.primary,
