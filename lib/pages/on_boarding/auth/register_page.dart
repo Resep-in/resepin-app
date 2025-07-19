@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:resepin/pages/home_page.dart';
-import 'package:resepin/pages/main_page.dart';
-import 'package:resepin/pages/on_boarding/auth/register_page.dart';
+import 'package:resepin/pages/on_boarding/auth/login_page.dart';
 import 'package:resepin/theme/appColors.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   bool _obsecurePassword = true;
 
   @override
@@ -31,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               // header
               Text(
-                "Log in",
+                "Register",
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontSize: 32,
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: height * 0.025),
               Text(
-                "Silahkan Masukkan Email dan Password anda",
+                "Silahkan daftar untuk memulai",
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontSize: 16,
@@ -116,6 +117,54 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: TextField(
+                            controller: _confirmPasswordController,
+                            obscureText: _obsecurePassword,
+                            decoration: InputDecoration(
+                              hintText: "Masukkan Password",
+                              hintStyle: GoogleFonts.poppins(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 30,
+                                horizontal: 10,
+                              ),
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _obsecurePassword = !_obsecurePassword;
+                                  });
+                                },
+                                icon: Icon(
+                                  _obsecurePassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  size: 26,
+                                ),
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // end password
+                        SizedBox(height: height * 0.02),
+                        // password
+                        Text(
+                          "Konfirmasi Password",
+                          style: GoogleFonts.poppins(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: height * 0.01),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.grey,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: TextField(
                             controller: _passwordController,
                             obscureText: _obsecurePassword,
                             decoration: InputDecoration(
@@ -154,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () {
-                              Get.to(MainPage());
+                              print("register");
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
@@ -164,7 +213,7 @@ class _LoginPageState extends State<LoginPage> {
                               padding: EdgeInsets.symmetric(vertical: 20),
                             ),
                             child: Text(
-                              "Login",
+                              "Register",
                               style: GoogleFonts.poppins(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -180,7 +229,7 @@ class _LoginPageState extends State<LoginPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "Belum punya akun?",
+                                "Sudah punya akun?",
                                 style: GoogleFonts.poppins(
                                   color: Colors.black,
                                   fontSize: 15,
@@ -191,10 +240,10 @@ class _LoginPageState extends State<LoginPage> {
 
                               GestureDetector(
                                 onTap: () {
-                                  Get.to(RegisterPage());
+                                  Get.to(LoginPage());
                                 },
                                 child: Text(
-                                  " Sign Up",
+                                  "Login",
                                   style: GoogleFonts.poppins(
                                     color: AppColors.primary,
                                     fontSize: 15,
