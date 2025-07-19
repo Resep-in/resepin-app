@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:resepin/pages/home_page.dart';
+import 'package:resepin/pages/main_page.dart';
 import 'package:resepin/pages/on_boarding/auth/register_page.dart';
 import 'package:resepin/theme/appColors.dart';
 
@@ -152,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () {
-                              print("login");
+                              Get.to(MainPage());
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
