@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:resepin/pages/custom/custom_menu_profile.dart';
+import 'package:resepin/pages/profile/edit_password_page.dart';
+import 'package:resepin/pages/profile/edit_profile_page.dart';
+import 'package:resepin/pages/profile/info_aplikasi_page.dart';
 import 'package:resepin/theme/appColors.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -71,38 +75,23 @@ class ProfilePage extends StatelessWidget {
               CustomMenuProfile(
                 title: 'Edit Profile',
                 icon: Icons.person,
-                // onTap: () {
-                //   Navigator.of(context, rootNavigator: true).push(
-                //     MaterialPageRoute(
-                //       builder: (context) =>
-                //           EditProfilePage(),
-                //     ),
-                //   );
-                // },
+                onTap: () {
+                  Get.to(EditProfilePage());
+                },
               ),
               CustomMenuProfile(
                 title: 'Edit Password',
                 icon: Icons.lock,
-                // onTap: () {
-                //   Navigator.of(context, rootNavigator: true).push(
-                //     MaterialPageRoute(
-                //       builder: (context) =>
-                //           EditProfilePage(),
-                //     ),
-                //   );
-                // },
+                onTap: () {
+                  Get.to(EditPasswordPage());
+                },
               ),
               CustomMenuProfile(
                 title: 'Info Aplikasi',
                 icon: Icons.info,
-                // onTap: () {
-                //   Navigator.of(context, rootNavigator: true).push(
-                //     MaterialPageRoute(
-                //       builder: (context) =>
-                //           EditProfilePage(),
-                //     ),
-                //   );
-                // },
+                onTap: () {
+                  Get.to(InfoAplikasiPage());
+                },
               ),
             ],
           ),

@@ -37,6 +37,7 @@ dependencies:
   get: ^4.7.2
   google_fonts: ^6.2.1
   persistent_bottom_nav_bar_v2: ^6.1.0
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
