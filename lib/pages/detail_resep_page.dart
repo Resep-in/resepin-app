@@ -19,7 +19,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
   bool isFavorite = false;
 
   final List<Map<String, dynamic>> ingredients = [
-    {"name": "Jasmine Rice", "amount": "2 Cups", "calories": "1299.0"},
+    {"name": "Jasmine Rice", "amount": "2 Cups", "calories": "129.0"},
     {"name": "Ketchup", "amount": "3 Tbsp", "calories": "45.0"},
     {"name": "Sesame Oil", "amount": "2 Tbsp", "calories": "240.0"},
     {"name": "Udang Segar", "amount": "200g", "calories": "85.0"},
