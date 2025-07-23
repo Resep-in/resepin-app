@@ -32,7 +32,7 @@ class AuthResponse {
       success: true,
       message: 'Data user berhasil diambil',
       token: null,
-      user: User.fromJson(json), // Response langsung adalah user object
+      user: json['user'] != null ? User.fromJson(json['user']) : null,
       errors: null,
     );
   }

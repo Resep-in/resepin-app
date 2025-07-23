@@ -140,6 +140,104 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<AuthResponse> register({
+    required String name,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    isLoading.value = true;
+
+    try {
+      final response = await http.post(
+        Uri.parse(RoutesApi.registerUrl()),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+          'password_confirmation': passwordConfirmation,
+        }),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        
+        // Jika register berhasil, langsung login atau redirect ke login
+        Get.snackbar(
+          'Register Berhasil',
+          'Akun berhasil dibuat. Silakan login.',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+          duration: Duration(seconds: 2),
+        );
+
+        // Redirect ke login page
+        Get.off(() => LoginPage());
+
+        return AuthResponse(
+          success: true,
+          message: responseData['message'] ?? 'Register berhasil',
+        );
+      } else {
+        final Map<String, dynamic> errorData = jsonDecode(response.body);
+        
+        String errorMessage = 'Register gagal';
+        if (errorData['message'] != null) {
+          errorMessage = errorData['message'];
+        }
+
+        // Handle validation errors
+        if (errorData['errors'] != null) {
+          Map<String, dynamic> errors = errorData['errors'];
+          List<String> errorMessages = [];
+          
+          errors.forEach((key, value) {
+            if (value is List && value.isNotEmpty) {
+              errorMessages.add(value.first.toString());
+            }
+          });
+          
+          if (errorMessages.isNotEmpty) {
+            errorMessage = errorMessages.join('\n');
+          }
+        }
+
+        Get.snackbar(
+          'Register Gagal',
+          errorMessage,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+          duration: Duration(seconds: 5),
+        );
+
+        return AuthResponse.fromError(
+          message: errorMessage,
+          errors: errorData['errors'],
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Terjadi kesalahan koneksi. Periksa internet Anda.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+
+      return AuthResponse.fromError(
+        message: 'Terjadi kesalahan koneksi',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> logout() async {
     try {
       if (accessToken.value.isNotEmpty) {
@@ -214,6 +312,93 @@ class AuthController extends GetxController {
       Get.snackbar(
         'Error',
         'Format email tidak valid',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  // Tambahkan method validasi register
+  bool validateRegisterInput({
+    required String name,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+  }) {
+    if (name.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Nama harus diisi',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return false;
+    }
+
+    if (name.trim().length < 2) {
+      Get.snackbar(
+        'Error',
+        'Nama minimal 2 karakter',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return false;
+    }
+
+    if (email.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Email harus diisi',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return false;
+    }
+
+    if (!GetUtils.isEmail(email.trim())) {
+      Get.snackbar(
+        'Error',
+        'Format email tidak valid',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return false;
+    }
+
+    if (password.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Password harus diisi',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return false;
+    }
+
+    if (password.length < 6) {
+      Get.snackbar(
+        'Error',
+        'Password minimal 6 karakter',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      return false;
+    }
+
+    if (password != passwordConfirmation) {
+      Get.snackbar(
+        'Error',
+        'Konfirmasi password tidak cocok',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
