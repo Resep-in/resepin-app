@@ -5,4 +5,13 @@ class RoutesApi {
   static String loginUrl() => '$baseUrl/login';
   static String userUrl() => '$baseUrl/user';
   static String logoutUrl() => '$baseUrl/logout';
+
+  // bookmark
+  static String addBookmarkUrl() => '$baseUrl/recipe/bookmark/add';
+  static String removeBookmarkUrl() => '$baseUrl/recipe/bookmark/remove';
+  static String listBookmarkUrl() => '$baseUrl/recipe/bookmark/list';
+
+  // recipe
+  static String healthCheckUrl() => '$baseUrl/recipe/predict/health-check';
+  static String predicUrl() => '$baseUrl/recipe/predict';
 }

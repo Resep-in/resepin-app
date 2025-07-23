@@ -15,7 +15,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-    final LoginController loginController = Get.find<LoginController>();
+    final AuthController authController = Get.put(AuthController());
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -54,9 +54,8 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: height * 0.01),
-                // Display user name from controller
                 Obx(() => Text(
-                  loginController.currentUser.value?.name ?? "User",
+                  authController.currentUser.value?.name ?? "User",
                   style: GoogleFonts.poppins(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -66,7 +65,7 @@ class ProfilePage extends StatelessWidget {
                 SizedBox(height: height * 0.005),
                 // Display user email from controller
                 Obx(() => Text(
-                  loginController.currentUser.value?.email ?? "user@email.com",
+                  authController.currentUser.value?.email ?? "user@email.com",
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -109,7 +108,7 @@ class ProfilePage extends StatelessWidget {
           //logout button with confirmation dialog
           GestureDetector(
             onTap: () {
-              _showLogoutConfirmation(context, loginController);
+              _showLogoutConfirmation(context, authController);
             },
             child: Container(
               width: double.infinity,
@@ -156,7 +155,7 @@ class ProfilePage extends StatelessWidget {
   }
 
   // Method untuk menampilkan confirmation dialog
-  void _showLogoutConfirmation(BuildContext context, LoginController loginController) {
+  void _showLogoutConfirmation(BuildContext context, AuthController authController) {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(
@@ -190,7 +189,7 @@ class ProfilePage extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Get.back(); // Close dialog first
-              await _performLogout(loginController);
+              await _performLogout(authController);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -213,7 +212,7 @@ class ProfilePage extends StatelessWidget {
   }
 
   // Method untuk perform logout dengan loading state
-  Future<void> _performLogout(LoginController loginController) async {
+  Future<void> _performLogout(AuthController authController) async {
     // Show loading dialog
     Get.dialog(
       AlertDialog(
@@ -242,9 +241,8 @@ class ProfilePage extends StatelessWidget {
 
     try {
       // Perform logout
-      await loginController.logout();
+      await authController.logout();
       
-      // Close loading dialog (jika masih ada)
       if (Get.isDialogOpen == true) {
         Get.back();
       }

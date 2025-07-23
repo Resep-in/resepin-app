@@ -10,7 +10,7 @@ import 'package:resepin/models/auth_response_model.dart';
 import 'package:resepin/models/user_model.dart';
 import 'package:resepin/pages/main_page.dart';
 
-class LoginController extends GetxController {
+class AuthController extends GetxController {
   var isLoading = false.obs;
   var isLoadingUser = false.obs;
   var accessToken = ''.obs;

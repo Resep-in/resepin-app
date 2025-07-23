@@ -87,8 +87,8 @@ class _SplashScreenPageState extends State<SplashScreenPage>
       bool isAuthenticated = await AuthService.isAuthenticated();
 
       if (isAuthenticated) {
-        final loginController = Get.put(LoginController());
-        await loginController.loadSavedData();
+        final authController = Get.put(AuthController());
+        await authController.loadSavedData();
 
         Get.offAll(
           () => const MainPage(),
