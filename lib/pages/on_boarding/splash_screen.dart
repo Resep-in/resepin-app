@@ -1,8 +1,10 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:resepin/services/auth_service.dart';
+import 'package:resepin/controllers/auth/auth_controller.dart';
 import 'package:resepin/pages/on_boarding/auth/login_page.dart';
+import 'package:resepin/pages/main_page.dart';
 import 'package:resepin/theme/appColors.dart';
 
 class SplashScreenPage extends StatefulWidget {
@@ -74,10 +76,39 @@ class _SplashScreenPageState extends State<SplashScreenPage>
       if (status == AnimationStatus.completed) {
         Timer(
           const Duration(milliseconds: 500),
-          () => Get.to(LoginPage())
+          () => _checkAuthStatus(),
         );
       }
     });
+  }
+
+  Future<void> _checkAuthStatus() async {
+    try {
+      bool isAuthenticated = await AuthService.isAuthenticated();
+
+      if (isAuthenticated) {
+        final loginController = Get.put(LoginController());
+        await loginController.loadSavedData();
+
+        Get.offAll(
+          () => const MainPage(),
+          transition: Transition.fadeIn,
+          duration: Duration(milliseconds: 500),
+        );
+      } else {
+        Get.offAll(
+          () => const LoginPage(),
+          transition: Transition.fadeIn,
+          duration: Duration(milliseconds: 500),
+        );
+      }
+    } catch (e) {
+      Get.offAll(
+        () => const LoginPage(),
+        transition: Transition.fadeIn,
+        duration: Duration(milliseconds: 500),
+      );
+    }
   }
 
   @override
@@ -89,7 +120,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -118,11 +149,11 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                   opacity: _logoOpacityAnimation.value,
                   child: Transform.scale(
                     scale: _logoScaleAnimation.value,
-                    // child: Image.asset(
-                    //   'assets/dish_discover_logo.png', 
-                    //   width: screenSize.width * 0.8,
-                    //   fit: BoxFit.contain,
-                    // ),
+                    child: Image.asset(
+                      'assets/logo-putih.png',
+                      width: screenSize.width * 0.8,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
