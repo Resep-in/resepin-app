@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:resepin/pages/on_boarding/auth/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resepin/api/api_controller.dart';
 import 'package:resepin/services/auth_service.dart';
@@ -16,7 +17,6 @@ class LoginController extends GetxController {
   var currentUser = Rxn<User>();
   final AuthService authService = AuthService();
 
-  // Login method
   Future<AuthResponse> login({
     required String email,
     required String password,
@@ -36,17 +36,13 @@ class LoginController extends GetxController {
         }),
       );
 
-      print('Login Status: ${response.statusCode}');
-      print('Login Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         final authResponse = AuthResponse.fromLoginJson(responseData);
         
-        // Simpan token dan user data
         if (authResponse.token != null) {
           accessToken.value = authResponse.token!;
-          await _saveTokenToStorage(authResponse.token!);
+          await AuthService.setToken(authResponse.token!);
         }
         
         if (authResponse.user != null) {
@@ -54,8 +50,7 @@ class LoginController extends GetxController {
           await _saveUserToStorage(authResponse.user!);
         }
 
-        // Set login status
-        await authService.setLoginStatus(true);
+        await AuthService.setLoginStatus(true);
 
         Get.snackbar(
           'Login Berhasil',
@@ -66,7 +61,6 @@ class LoginController extends GetxController {
           duration: Duration(seconds: 2),
         );
 
-        // Navigate to main page
         Get.offAll(() => MainPage());
 
         return authResponse;
@@ -76,8 +70,6 @@ class LoginController extends GetxController {
         String errorMessage = 'Login gagal';
         if (errorData['message'] != null) {
           errorMessage = errorData['message'];
-        } else if (errorData['errors'] != null) {
-          errorMessage = _formatErrors(errorData['errors']);
         }
 
         Get.snackbar(
@@ -95,8 +87,6 @@ class LoginController extends GetxController {
         );
       }
     } catch (e) {
-      print('Login Error: $e');
-      
       Get.snackbar(
         'Error',
         'Terjadi kesalahan koneksi. Periksa internet Anda.',
@@ -113,10 +103,8 @@ class LoginController extends GetxController {
     }
   }
 
-  // Get current user data from API
   Future<void> getCurrentUser() async {
     if (accessToken.value.isEmpty) {
-      print('No token available');
       return;
     }
 
@@ -124,16 +112,13 @@ class LoginController extends GetxController {
 
     try {
       final response = await http.get(
-        Uri.parse(RoutesApi.userUrl()), // Tambahkan ini ke RoutesApi
+        Uri.parse(RoutesApi.userUrl()),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': 'Bearer ${accessToken.value}',
         },
       );
-
-      print('User Status: ${response.statusCode}');
-      print('User Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -144,20 +129,17 @@ class LoginController extends GetxController {
           await _saveUserToStorage(authResponse.user!);
         }
       } else {
-        print('Failed to get user data: ${response.statusCode}');
-        // Token mungkin expired, logout user
         if (response.statusCode == 401) {
           await logout();
         }
       }
     } catch (e) {
-      print('Get User Error: $e');
+      // Silent fail
     } finally {
       isLoadingUser.value = false;
     }
   }
 
-  // Logout method
   Future<void> logout() async {
     try {
       if (accessToken.value.isNotEmpty) {
@@ -171,14 +153,12 @@ class LoginController extends GetxController {
         );
       }
     } catch (e) {
-      print('Logout API Error: $e');
+      // Silent fail
     } finally {
-      // Clear local data
       accessToken.value = '';
       currentUser.value = null;
-      await authService.setLoginStatus(false);
-      await _removeTokenFromStorage();
-      await _removeUserFromStorage();
+      
+      await AuthService.clearAuthData();
 
       Get.snackbar(
         'Logout Berhasil',
@@ -188,14 +168,8 @@ class LoginController extends GetxController {
         snackPosition: SnackPosition.TOP,
       );
 
-      Get.offAllNamed('/login');
+      Get.offAll(() => LoginPage());
     }
-  }
-
-  // Storage helper methods
-  Future<void> _saveTokenToStorage(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', token);
   }
 
   Future<void> _saveUserToStorage(User user) async {
@@ -203,44 +177,22 @@ class LoginController extends GetxController {
     await prefs.setString('user_data', jsonEncode(user.toJson()));
   }
 
-  Future<void> _removeTokenFromStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
-  }
-
-  Future<void> _removeUserFromStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user_data');
-  }
-
-  // Load saved data
   Future<void> loadSavedData() async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    final token = prefs.getString('auth_token');
-    if (token != null) {
-      accessToken.value = token;
-      // Get fresh user data from API
-      await getCurrentUser();
-    }
-    
-    final userDataString = prefs.getString('user_data');
-    if (userDataString != null && currentUser.value == null) {
-      final userData = jsonDecode(userDataString);
-      currentUser.value = User.fromJson(userData);
-    }
-  }
-
-  String _formatErrors(Map<String, dynamic> errors) {
-    List<String> errorMessages = [];
-    errors.forEach((key, value) {
-      if (value is List) {
-        errorMessages.addAll(value.cast<String>());
-      } else {
-        errorMessages.add(value.toString());
+    try {
+      final token = await AuthService.getToken();
+      if (token != null && token.isNotEmpty) {
+        accessToken.value = token;
       }
-    });
-    return errorMessages.join('\n');
+      
+      final prefs = await SharedPreferences.getInstance();
+      final userDataString = prefs.getString('user_data');
+      if (userDataString != null) {
+        final userData = jsonDecode(userDataString);
+        currentUser.value = User.fromJson(userData);
+      }
+    } catch (e) {
+      await AuthService.clearAuthData();
+    }
   }
 
   bool validateLoginInput({
