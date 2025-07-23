@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:resepin/controllers/auth/auth_controller.dart';
 import 'package:resepin/pages/custom/custom_card_resep_bookmark.dart';
 import 'package:resepin/theme/appColors.dart';
 
@@ -10,13 +12,13 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
     final double height = MediaQuery.of(context).size.height;
+    final AuthController authController = Get.put(AuthController());
     
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header Section (Fixed)
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: width * 0.07,
@@ -26,7 +28,7 @@ class HomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Halo Daus",
+                    "Halo ${authController.currentUser.value?.name ?? "User"}",
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,

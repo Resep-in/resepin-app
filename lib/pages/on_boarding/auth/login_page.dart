@@ -15,7 +15,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final LoginController _loginController = Get.put(LoginController());
+  final AuthController _authController = Get.put(AuthController());
   bool _obsecurePassword = true;
 
   @override
@@ -173,23 +173,23 @@ class _LoginPageState extends State<LoginPage> {
                               Obx(() => SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: _loginController.isLoading.value
+                                  onPressed: _authController.isLoading.value
                                       ? null // Disable button saat loading
                                       : () async {
                                           // Validasi input
-                                          if (_loginController.validateLoginInput(
+                                          if (_authController.validateLoginInput(
                                             email: _emailController.text.trim(),
                                             password: _passwordController.text,
                                           )) {
                                             // Panggil method login
-                                            await _loginController.login(
+                                            await _authController.login(
                                               email: _emailController.text.trim(),
                                               password: _passwordController.text,
                                             );
                                           }
                                         },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: _loginController.isLoading.value
+                                    backgroundColor: _authController.isLoading.value
                                         ? AppColors.primary.withOpacity(0.6)
                                         : AppColors.primary,
                                     shape: RoundedRectangleBorder(
@@ -197,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                     padding: EdgeInsets.symmetric(vertical: 20),
                                   ),
-                                  child: _loginController.isLoading.value
+                                  child: _authController.isLoading.value
                                       ? Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
