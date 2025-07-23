@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:resepin/controllers/auth/auth_controller.dart';
+import 'package:resepin/controllers/profile_controller.dart';
 import 'package:resepin/theme/appColors.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -15,25 +17,31 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  
+
+  final ProfileController _profileController = Get.put(ProfileController());
+  final AuthController _authController = Get.find<AuthController>();
+
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    // Initialize with current user data
-    _nameController.text = "Daus"; // Replace with actual user data
-    _emailController.text = "daus@example.com"; // Replace with actual user data
-    _phoneController.text = "081234567890"; // Replace with actual user data
+    _loadUserData();
+  }
+
+  void _loadUserData() {
+    final user = _authController.currentUser.value;
+    if (user != null) {
+      _nameController.text = user.name;
+      _emailController.text = user.email;
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     super.dispose();
   }
 
@@ -116,11 +124,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               color: (color ?? AppColors.primary).withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 32,
-              color: color ?? AppColors.primary,
-            ),
+            child: Icon(icon, size: 32, color: color ?? AppColors.primary),
           ),
           SizedBox(height: 8),
           Text(
@@ -149,12 +153,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
         setState(() {
           _selectedImage = File(pickedFile.path);
         });
-        Get.back(); // Close bottom sheet
+        Get.back();
         Get.snackbar(
           "Success",
           "Foto berhasil dipilih",
           backgroundColor: Colors.green,
           colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
         );
       }
     } catch (e) {
@@ -163,6 +168,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         "Gagal memilih foto: $e",
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
       );
     }
   }
@@ -171,46 +177,31 @@ class _EditProfilePageState extends State<EditProfilePage> {
     setState(() {
       _selectedImage = null;
     });
-    Get.back(); // Close bottom sheet
+    Get.back();
     Get.snackbar(
       "Success",
       "Foto berhasil dihapus",
       backgroundColor: Colors.orange,
       colorText: Colors.white,
+      snackPosition: SnackPosition.TOP,
     );
   }
 
-  void _saveChanges() {
-    // Validation
-    if (_nameController.text.trim().isEmpty) {
-      Get.snackbar(
-        "Error",
-        "Nama tidak boleh kosong",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+  Future<void> _saveChanges() async {
+    if (_profileController.validateProfileInput(
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+    )) {
+      bool success = await _profileController.updateProfile(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        image: _selectedImage,
       );
-      return;
-    }
 
-    if (_emailController.text.trim().isEmpty || !GetUtils.isEmail(_emailController.text)) {
-      Get.snackbar(
-        "Error", 
-        "Email tidak valid",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
+      if (success) {
+        Get.back();
+      }
     }
-
-    // TODO: Implement API call to update profile
-    // Include _selectedImage in the API call if it's not null
-    Get.snackbar(
-      "Success",
-      "Profile berhasil diperbarui",
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
-    Get.back();
   }
 
   @override
@@ -223,7 +214,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: width * 0.05,
@@ -250,31 +240,61 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(width: 40), // Balance the back button
+                  SizedBox(width: 40),
                 ],
               ),
             ),
 
-            // Profile Image Section
+            // 🎯 PROFILE IMAGE SECTION (FIXED GetX SCOPE)
             Container(
               margin: EdgeInsets.symmetric(vertical: height * 0.02),
               child: Column(
                 children: [
                   Stack(
                     children: [
+                      // 🎯 FIXED: Separate Obx for image display only
                       CircleAvatar(
                         radius: 60,
                         backgroundColor: AppColors.primary.withOpacity(0.1),
-                        backgroundImage: _selectedImage != null 
-                          ? FileImage(_selectedImage!) 
-                          : null,
-                        child: _selectedImage == null 
-                          ? Icon(
-                              Icons.person,
-                              size: 60,
-                              color: AppColors.primary,
-                            )
-                          : null,
+                        child: _selectedImage != null
+                            ? ClipOval(
+                                child: Image.file(
+                                  _selectedImage!,
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : (_authController.currentUser.value?.profileUrl !=
+                                      null &&
+                                  _authController
+                                      .currentUser
+                                      .value!
+                                      .profileUrl!
+                                      .isNotEmpty)
+                            ? ClipOval(
+                                child: Image.network(
+                                  _authController
+                                      .currentUser
+                                      .value!
+                                      .profileUrl!,
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.person,
+                                      size: 60,
+                                      color: AppColors.primary,
+                                    );
+                                  },
+                                ),
+                              )
+                            : Icon(
+                                Icons.person,
+                                size: 60,
+                                color: AppColors.primary,
+                              ),
                       ),
                       Positioned(
                         bottom: 0,
@@ -283,17 +303,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           decoration: BoxDecoration(
                             color: AppColors.primary,
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2,
-                            ),
+                            border: Border.all(color: Colors.white, width: 2),
                           ),
-                          child: IconButton(
-                            onPressed: _showImagePickerDialog,
-                            icon: Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                              size: 20,
+                          child: Obx(
+                            () => IconButton(
+                              onPressed:
+                                  _profileController.isImageUploading.value
+                                  ? null
+                                  : _showImagePickerDialog,
+                              icon: _profileController.isImageUploading.value
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
                             ),
                           ),
                         ),
@@ -301,81 +332,101 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ],
                   ),
                   SizedBox(height: 12),
-                  Text(
-                    _selectedImage != null 
-                      ? "Tap to change photo" 
-                      : "Tap to add photo",
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
+                  Obx(
+                    () => Text(
+                      _selectedImage != null
+                          ? "Foto baru dipilih"
+                          : (_authController.currentUser.value?.name != null
+                                ? "Foto profile ${_authController.currentUser.value!.name}"
+                                : "Tap untuk ubah foto"),
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],
               ),
             ),
 
-            // Form Fields
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: width * 0.05),
                 child: Column(
                   children: [
                     SizedBox(height: height * 0.02),
-                    
-                    // Name Field
+
                     _buildTextField(
                       label: "Nama Lengkap",
                       controller: _nameController,
-                      hintText: "Masukkan nama lengkap",
+                      hintText: _authController.currentUser.value?.name ?? "Masukkan nama lengkap",
                       icon: Icons.person_outline,
                     ),
                     SizedBox(height: height * 0.025),
-                    
-                    // Email Field
+
                     _buildTextField(
                       label: "Email",
                       controller: _emailController,
-                      hintText: "Masukkan email",
+                      hintText: _authController.currentUser.value?.email ?? "Masukkan email",
                       icon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                     ),
                     SizedBox(height: height * 0.025),
-                    
-                    // Phone Field
-                    _buildTextField(
-                      label: "Nomor Telepon",
-                      controller: _phoneController,
-                      hintText: "Masukkan nomor telepon",
-                      icon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone,
-                    ),
-                    SizedBox(height: height * 0.04),
                   ],
                 ),
               ),
             ),
 
-            // Save Button
             Container(
               width: double.infinity,
               padding: EdgeInsets.all(width * 0.05),
-              child: ElevatedButton(
-                onPressed: _saveChanges,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              child: Obx(
+                () => ElevatedButton(
+                  onPressed: _profileController.isLoading.value
+                      ? null
+                      : _saveChanges,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _profileController.isLoading.value
+                        ? AppColors.primary.withOpacity(0.6)
+                        : AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    elevation: 2,
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  elevation: 2,
-                ),
-                child: Text(
-                  "Simpan Perubahan",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
+                  child: _profileController.isLoading.value
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              "Menyimpan...",
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          "Simpan Perubahan",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -408,18 +459,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
           decoration: BoxDecoration(
             color: Color(0xFFF6F6F6),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.grey.shade300,
-              width: 1,
-            ),
+            border: Border.all(color: Colors.grey.shade300, width: 1),
           ),
           child: TextField(
             controller: controller,
             keyboardType: keyboardType,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.black,
-            ),
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.black),
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: GoogleFonts.poppins(
@@ -431,11 +476,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 vertical: 16,
                 horizontal: 16,
               ),
-              prefixIcon: Icon(
-                icon,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
             ),
           ),
         ),

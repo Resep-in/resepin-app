@@ -17,11 +17,17 @@ class ProfilePage extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final AuthController authController = Get.put(AuthController());
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (authController.currentUser.value == null) {
+        authController.loadSavedData();
+        authController.getCurrentUser();
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // start header profile
           Container(
             height: height * 0.3,
             width: double.infinity,
@@ -44,68 +50,55 @@ class ProfilePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey.shade300,
-                  child: Icon(
-                    Icons.person,
-                    size: 50,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
+                _buildProfileImage(authController),
                 SizedBox(height: height * 0.01),
                 Obx(() => Text(
                   authController.currentUser.value?.name ?? "User",
                   style: GoogleFonts.poppins(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: Colors.white,
                   ),
                 )),
                 SizedBox(height: height * 0.005),
-                // Display user email from controller
                 Obx(() => Text(
                   authController.currentUser.value?.email ?? "user@email.com",
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: Colors.black54,
+                    color: Colors.white70,
                   ),
                 )),
               ],
             ),
           ),
-          // end header profile
           SizedBox(height: height * 0.02),
-          //start menu list
           Column(
             children: [
               CustomMenuProfile(
                 title: 'Edit Profile',
                 icon: Icons.person,
                 onTap: () {
-                  Get.to(EditProfilePage());
+                  Get.to(() => EditProfilePage());
                 },
               ),
               CustomMenuProfile(
                 title: 'Edit Password',
                 icon: Icons.lock,
                 onTap: () {
-                  Get.to(EditPasswordPage());
+                  Get.to(() => EditPasswordPage());
                 },
               ),
               CustomMenuProfile(
                 title: 'Info Aplikasi',
                 icon: Icons.info,
                 onTap: () {
-                  Get.to(InfoAplikasiPage());
+                  Get.to(() => InfoAplikasiPage());
                 },
               ),
             ],
           ),
-          //end menu list
           Expanded(child: Container()),
-          //logout button with confirmation dialog
           GestureDetector(
             onTap: () {
               _showLogoutConfirmation(context, authController);
@@ -154,7 +147,90 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // Method untuk menampilkan confirmation dialog
+  Widget _buildProfileImage(AuthController controller) {
+    return Obx(() {
+      final user = controller.currentUser.value;
+      final profileUrl = user?.profileUrl;
+      
+      return Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white,
+            width: 3,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipOval(
+          child: profileUrl != null && profileUrl.isNotEmpty
+              ? Image.network(
+                  profileUrl,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                          strokeWidth: 3,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return _buildDefaultAvatar();
+                  },
+                )
+              : _buildDefaultAvatar(),
+        ),
+      );
+    });
+  }
+
+  Widget _buildDefaultAvatar() {
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withOpacity(0.9),
+            Colors.white.withOpacity(0.7),
+          ],
+        ),
+      ),
+      child: Icon(
+        Icons.person,
+        size: 50,
+        color: AppColors.primary,
+      ),
+    );
+  }
+
   void _showLogoutConfirmation(BuildContext context, AuthController authController) {
     Get.dialog(
       AlertDialog(
@@ -188,7 +264,7 @@ class ProfilePage extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              Get.back(); // Close dialog first
+              Get.back();
               await _performLogout(authController);
             },
             style: ElevatedButton.styleFrom(
@@ -207,13 +283,11 @@ class ProfilePage extends StatelessWidget {
           ),
         ],
       ),
-      barrierDismissible: false, // Prevent dismissing by tapping outside
+      barrierDismissible: false,
     );
   }
 
-  // Method untuk perform logout dengan loading state
   Future<void> _performLogout(AuthController authController) async {
-    // Show loading dialog
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(
@@ -240,19 +314,16 @@ class ProfilePage extends StatelessWidget {
     );
 
     try {
-      // Perform logout
       await authController.logout();
-      
+
       if (Get.isDialogOpen == true) {
         Get.back();
       }
     } catch (e) {
-      // Close loading dialog
       if (Get.isDialogOpen == true) {
         Get.back();
       }
       
-      // Show error message
       Get.snackbar(
         'Error',
         'Terjadi kesalahan saat logout',

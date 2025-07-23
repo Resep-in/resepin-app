@@ -6,6 +6,10 @@ class RoutesApi {
   static String userUrl() => '$baseUrl/user';
   static String logoutUrl() => '$baseUrl/logout';
 
+  // user
+  static String editProfileUrl() => '$baseUrl/user/profile/edit';
+  static String changePasswordUrl() => '$baseUrl/user/password/change';
+
   // bookmark
   static String addBookmarkUrl() => '$baseUrl/recipe/bookmark/add';
   static String removeBookmarkUrl() => '$baseUrl/recipe/bookmark/remove';

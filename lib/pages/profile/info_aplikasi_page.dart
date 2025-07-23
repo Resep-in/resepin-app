@@ -170,7 +170,7 @@ class InfoAplikasiPage extends StatelessWidget {
                           ),
                           SizedBox(height: 12),
                           Text(
-                            "Resepin adalah aplikasi resep makanan yang membantu Anda menemukan dan membuat berbagai macam hidangan lezat. Dengan koleksi resep yang lengkap dan fitur Chef AI, memasak menjadi lebih mudah dan menyenangkan.",
+                            "Resepin is a recipe app for home ingredients, powered by artificial intelligence. Get recipes based on the ingredients you have, without the hassle of searching for them manually. Change your lifestyle to be more convenient and delicious with Resepin. (AI could generate mistaken data, so double check it)",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: Colors.grey.shade700,
@@ -258,11 +258,7 @@ class InfoAplikasiPage extends StatelessWidget {
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+            child: Icon(icon, color: color, size: 24),
           ),
           SizedBox(width: 16),
           Expanded(
@@ -307,19 +303,12 @@ class InfoAplikasiPage extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: color.withOpacity(0.3),
-            width: 1,
-          ),
+          border: Border.all(color: color.withOpacity(0.3), width: 1),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: color,
-              size: 20,
-            ),
+            Icon(icon, color: color, size: 20),
             SizedBox(width: 8),
             Text(
               label,
