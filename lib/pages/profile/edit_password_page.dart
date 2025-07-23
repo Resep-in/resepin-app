@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:resepin/controllers/password_controller.dart';
 import 'package:resepin/theme/appColors.dart';
 
 class EditPasswordPage extends StatefulWidget {
@@ -15,6 +16,9 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   
+  // 🎯 TAMBAHKAN PASSWORD CONTROLLER
+  final PasswordController _passwordController = Get.put(PasswordController());
+  
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
@@ -27,56 +31,32 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
     super.dispose();
   }
 
-  void _saveChanges() {
-    // Validasi form
-    if (_oldPasswordController.text.isEmpty) {
-      Get.snackbar(
-        "Error",
-        "Password lama harus diisi",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+  // 🎯 IMPLEMENTASI API CALL
+  Future<void> _saveChanges() async {
+    // Validation menggunakan PasswordController
+    if (_passwordController.validatePasswordInput(
+      oldPassword: _oldPasswordController.text.trim(),
+      newPassword: _newPasswordController.text.trim(),
+      confirmPassword: _confirmPasswordController.text.trim(),
+    )) {
+      // Call API untuk change password
+      bool success = await _passwordController.changePassword(
+        currentPassword: _oldPasswordController.text.trim(),
+        newPassword: _newPasswordController.text.trim(),
+        confirmPassword: _confirmPasswordController.text.trim(),
       );
-      return;
-    }
 
-    if (_newPasswordController.text.isEmpty) {
-      Get.snackbar(
-        "Error", 
-        "Password baru harus diisi",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
+      if (success) {
+        // Clear form fields
+        _oldPasswordController.clear();
+        _newPasswordController.clear();
+        _confirmPasswordController.clear();
+        
+        // Navigate back after short delay
+        await Future.delayed(Duration(milliseconds: 500));
+        Get.back();
+      }
     }
-
-    if (_newPasswordController.text.length < 6) {
-      Get.snackbar(
-        "Error",
-        "Password baru minimal 6 karakter",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
-    if (_newPasswordController.text != _confirmPasswordController.text) {
-      Get.snackbar(
-        "Error",
-        "Konfirmasi password tidak cocok",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
-    // TODO: Implement API call to change password
-    Get.snackbar(
-      "Success",
-      "Password berhasil diubah",
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
-    Get.back();
   }
 
   @override
@@ -194,7 +174,7 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              "• Minimal 6 karakter\n• Kombinasi huruf dan angka disarankan",
+                              "• Minimal 6 karakter\n• Harus berbeda dari password lama\n• Kombinasi huruf dan angka disarankan",
                               style: GoogleFonts.poppins(
                                 fontSize: 11,
                                 color: Colors.blue.shade700,
@@ -208,28 +188,55 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                 ),
               ),
               
-              // Save Button
+              // 🎯 SAVE BUTTON DENGAN LOADING STATE
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saveChanges,
+                child: Obx(() => ElevatedButton(
+                  onPressed: _passwordController.isLoading.value 
+                      ? null 
+                      : _saveChanges,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: _passwordController.isLoading.value
+                        ? AppColors.primary.withOpacity(0.6)
+                        : AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: EdgeInsets.symmetric(vertical: 16),
                     elevation: 2,
                   ),
-                  child: Text(
-                    "Simpan Perubahan",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                  child: _passwordController.isLoading.value
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              "Mengubah Password...",
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          "Simpan Perubahan",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                )),
               ),
             ],
           ),
@@ -269,6 +276,10 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
           child: TextField(
             controller: controller,
             obscureText: obscureText,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.black,
+            ),
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: GoogleFonts.poppins(

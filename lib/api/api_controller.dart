@@ -3,8 +3,13 @@ class RoutesApi {
 
   // auth
   static String loginUrl() => '$baseUrl/login';
+  static String registerUrl() => '$baseUrl/register';
   static String userUrl() => '$baseUrl/user';
   static String logoutUrl() => '$baseUrl/logout';
+
+  // user
+  static String editProfileUrl() => '$baseUrl/user/profile/edit';
+  static String changePasswordUrl() => '$baseUrl/user/password/change';
 
   // bookmark
   static String addBookmarkUrl() => '$baseUrl/recipe/bookmark/add';
@@ -13,5 +18,5 @@ class RoutesApi {
 
   // recipe
   static String healthCheckUrl() => '$baseUrl/recipe/predict/health-check';
-  static String predicUrl() => '$baseUrl/recipe/predict';
+  static String predictUrl() => '$baseUrl/recipe/predict';
 }
