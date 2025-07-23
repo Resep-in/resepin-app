@@ -11,5 +11,7 @@ class RoutesApi {
   static String removeBookmarkUrl() => '$baseUrl/recipe/bookmark/remove';
   static String listBookmarkUrl() => '$baseUrl/recipe/bookmark/list';
 
-  
+  // recipe
+  static String healthCheckUrl() => '$baseUrl/recipe/predict/health-check';
+  static String predicUrl() => '$baseUrl/recipe/predict';
 }
