@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resepin/controllers/auth/auth_controller.dart';
+import 'package:resepin/controllers/bookmark_controller.dart';
+import 'package:resepin/controllers/recipe_controller.dart';
 import 'package:resepin/pages/on_boarding/splash_screen.dart';
 import 'package:resepin/pages/on_boarding/auth/login_page.dart';
 import 'package:resepin/pages/main_page.dart';
@@ -24,6 +26,11 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/home', page: () => const MainPage()),
         GetPage(name: '/splash', page: () => const SplashScreenPage()),
       ],
+      initialBinding: BindingsBuilder(() {
+        Get.put(AuthController());
+        Get.put(RecipeController());
+        Get.put(BookmarkController());
+      }),
     );
   }
 }

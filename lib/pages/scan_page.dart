@@ -189,40 +189,6 @@ class _ScanPageState extends State<ScanPage> {
                     ],
                   ),
                 ),
-
-                // Debug buttons (only in debug mode)
-                if (kDebugMode) ...[
-                  SizedBox(height: height * 0.03),
-                  
-                  Column(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          _showLoadingDialog("Testing server health...");
-                          bool healthy = await _recipeController.testServerHealth();
-                          Get.back();
-                          
-                          Get.snackbar(
-                            healthy ? 'Server OK' : 'Server Issue',
-                            healthy ? 'Server berfungsi normal' : 'Server bermasalah',
-                            backgroundColor: healthy ? Colors.green : Colors.red,
-                            colorText: Colors.white,
-                          );
-                        },
-                        child: Text('Test Server Health'),
-                      ),
-                      
-                      SizedBox(height: 8),
-                      
-                      ElevatedButton(
-                        onPressed: _showDetailedResponse,
-                        child: Text('Show Debug Info'),
-                      ),
-                    ],
-                  ),
-                ],
-
-                SizedBox(height: height * 0.05),
               ],
             ),
           ),
@@ -373,7 +339,7 @@ class _ScanPageState extends State<ScanPage> {
           _isLocalLoading = false;
         });
         
-        Get.back(); // Close loading dialog
+        Get.back();
         
         if (success && _recipeController.hasRecommendations) {
           Future.delayed(Duration(seconds: 1), () {

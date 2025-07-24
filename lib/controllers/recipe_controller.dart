@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:resepin/api/api_controller.dart';
 import 'package:resepin/services/auth_service.dart';
+import 'package:resepin/controllers/auth/auth_controller.dart';
 
 class Recipe {
   final int id;
@@ -33,50 +34,80 @@ class Recipe {
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
-    // Helper function untuk parse ingredients_serving
-    List<String> parseIngredientsServing(dynamic ingredientsData) {
-      try {
-        if (ingredientsData == null) return [];
-        
-        if (ingredientsData is String) {
-          // Parse string format "[['1', 'piece large firm tofu'], ['250 g', 'french bean']]"
-          if (ingredientsData.startsWith('[') && ingredientsData.endsWith(']')) {
-            var parsed = jsonDecode(ingredientsData);
-            if (parsed is List) {
-              return parsed.map((item) {
-                if (item is List && item.length >= 2) {
-                  return '${item[0]} ${item[1]}'; // Combine quantity and ingredient
-                }
-                return item.toString();
-              }).cast<String>().toList();
-            }
-          }
-          return [ingredientsData];
-        } else if (ingredientsData is List) {
-          return ingredientsData.cast<String>();
-        }
-        
-        return [];
-      } catch (e) {
-        print('❌ Error parsing ingredients_serving: $e');
-        return [];
+    try {
+      // Safe integer conversion
+      int recipeId;
+      if (json['id'] is int) {
+        recipeId = json['id'];
+      } else if (json['id'] is String) {
+        recipeId = int.tryParse(json['id']) ?? 0;
+      } else {
+        recipeId = 0;
       }
-    }
 
-    return Recipe(
-      id: json['id']?.toInt() ?? 0,
-      title: json['title']?.toString() ?? '',
-      fullUrl: json['full_url']?.toString() ?? '',
-      imageUrl: json['image_url']?.toString() ?? '',
-      searchIndex: json['search_index']?.toString(),
-      steps: json['steps']?.toString() ?? '',
-      ingredientsServing: parseIngredientsServing(json['ingredients_serving']),
-      cleanedIngredients: json['cleaned_ingredients'] != null 
-          ? List<String>.from(json['cleaned_ingredients'])
-          : [],
-      createdAt: json['created_at']?.toString(),
-      updatedAt: json['updated_at']?.toString(),
-    );
+      // Safe list parsing untuk ingredients_serving
+      List<String> parseIngredientsServing(dynamic data) {
+        try {
+          if (data == null) return [];
+          
+          if (data is String) {
+            return [data];
+          } else if (data is List) {
+            return data.map((e) => e.toString()).toList();
+          }
+          
+          return [];
+        } catch (e) {
+          print('❌ Error parsing ingredients_serving: $e');
+          return [];
+        }
+      }
+
+      // Safe list parsing untuk cleaned_ingredients
+      List<String> parseCleanedIngredients(dynamic data) {
+        try {
+          if (data == null) return [];
+          
+          if (data is List) {
+            return data.map((e) => e.toString()).toList();
+          } else if (data is String) {
+            return [data];
+          }
+          
+          return [];
+        } catch (e) {
+          print('❌ Error parsing cleaned_ingredients: $e');
+          return [];
+        }
+      }
+
+      return Recipe(
+        id: recipeId,
+        title: json['title']?.toString() ?? '',
+        fullUrl: json['full_url']?.toString() ?? '',
+        imageUrl: json['image_url']?.toString() ?? '',
+        searchIndex: json['search_index']?.toString(),
+        steps: json['steps']?.toString() ?? '',
+        ingredientsServing: parseIngredientsServing(json['ingredients_serving']),
+        cleanedIngredients: parseCleanedIngredients(json['cleaned_ingredients']),
+        createdAt: json['created_at']?.toString(),
+        updatedAt: json['updated_at']?.toString(),
+      );
+    } catch (e) {
+      print('❌ Error parsing Recipe from JSON: $e');
+      print('❌ JSON data: $json');
+      
+      // Return default recipe dengan minimal data
+      return Recipe(
+        id: 0,
+        title: 'Unknown Recipe',
+        fullUrl: '',
+        imageUrl: '',
+        steps: '',
+        ingredientsServing: [],
+        cleanedIngredients: [],
+      );
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -297,36 +328,90 @@ class RecipeController extends GetxController {
     Set<String> uniqueIngredients = {};
     
     for (Recipe recipe in recipes) {
-      // From cleaned_ingredients
+      // From cleaned_ingredients (ini yang lebih bersih)
       for (String ingredient in recipe.cleanedIngredients) {
         if (ingredient.trim().isNotEmpty) {
-          uniqueIngredients.add(ingredient.trim().toLowerCase());
+          String cleanIngredient = ingredient.trim().toLowerCase();
+          // Remove common words dan bersihkan
+          cleanIngredient = _cleanIngredientName(cleanIngredient);
+          if (cleanIngredient.isNotEmpty) {
+            uniqueIngredients.add(cleanIngredient);
+          }
         }
       }
       
-      // From ingredients_serving (extract ingredient names)
+      // From ingredients_serving - parse JSON format
       for (String ingredientServing in recipe.ingredientsServing) {
         try {
-          // Extract ingredient name from "quantity ingredient" format
-          List<String> parts = ingredientServing.split(' ');
-          if (parts.length >= 2) {
-            // Skip quantity, get ingredient name
-            String ingredient = parts.skip(1).join(' ').trim().toLowerCase();
-            if (ingredient.isNotEmpty) {
-              uniqueIngredients.add(ingredient);
+          if (ingredientServing.startsWith('[') && ingredientServing.endsWith(']')) {
+            var parsed = jsonDecode(ingredientServing);
+            if (parsed is List) {
+              for (var item in parsed) {
+                if (item is List && item.length >= 2) {
+                  // item[1] adalah nama ingredient
+                  String ingredientName = item[1].toString().toLowerCase().trim();
+                  ingredientName = _cleanIngredientName(ingredientName);
+                  if (ingredientName.isNotEmpty) {
+                    uniqueIngredients.add(ingredientName);
+                  }
+                }
+              }
             }
           }
         } catch (e) {
-          print('❌ Error extracting ingredient from: $ingredientServing');
+          print('❌ Error parsing ingredients_serving: $e');
         }
       }
     }
     
-    detectedIngredients.value = uniqueIngredients.toList();
-    predictedIngredients.value = uniqueIngredients.toList(); // For compatibility
+    // Sort dan ambil yang paling umum
+    List<String> sortedIngredients = uniqueIngredients.toList()..sort();
+    
+    detectedIngredients.value = sortedIngredients;
+    predictedIngredients.value = sortedIngredients; // For compatibility
     
     print('🥬 Extracted ${detectedIngredients.length} unique ingredients');
-    print('🥬 Sample ingredients: ${detectedIngredients.take(10).toList()}${detectedIngredients.length > 10 ? '...' : ''}');
+    print('🥬 Clean ingredients: ${detectedIngredients.take(15).toList()}');
+  }
+
+  /// Helper method untuk membersihkan nama ingredient
+  String _cleanIngredientName(String ingredient) {
+    // Remove common words dan bersihkan
+    String cleaned = ingredient.toLowerCase().trim();
+    
+    // Remove common prefixes dan suffixes
+    List<String> wordsToRemove = [
+      'piece', 'pieces', 'large', 'small', 'medium', 'firm', 'fresh', 'dried',
+      'chopped', 'sliced', 'minced', 'ground', 'coarse', 'fine', 'needed',
+      'tablespoon', 'tablespoons', 'teaspoon', 'teaspoons', 'cup', 'cups',
+      'gram', 'grams', 'kg', 'ml', 'liter', 'liters', 'lb', 'ounce', 'ounces',
+      'for', 'with', 'and', 'or', 'of', 'the', 'a', 'an', 'to', 'in', 'on',
+      'package', 'packages', 'bottle', 'bottles', 'can', 'cans', 'jar', 'jars'
+    ];
+    
+    // Split into words and filter
+    List<String> words = cleaned.split(' ');
+    List<String> filteredWords = [];
+    
+    for (String word in words) {
+      word = word.trim();
+      // Skip empty, numbers, atau common words
+      if (word.isNotEmpty && 
+          !wordsToRemove.contains(word) && 
+          !RegExp(r'^\d+(\.\d+)?$').hasMatch(word) &&
+          word.length > 2) {
+        filteredWords.add(word);
+      }
+    }
+    
+    // Join back dan clean up
+    String result = filteredWords.join(' ').trim();
+    
+    // Additional cleaning
+    result = result.replaceAll(RegExp(r'\[|\]|\(|\)'), '');
+    result = result.replaceAll(RegExp(r'\s+'), ' ');
+    
+    return result;
   }
 
   bool _handleErrorResponse(http.Response response) {
@@ -466,6 +551,75 @@ class RecipeController extends GetxController {
     } catch (e) {
       print('❌ Server health check failed: $e');
       return false;
+    }
+  }
+
+  /// Get detailed recipe data by ID (for all sources)
+  Future<Recipe?> getRecipeDetail(int recipeId) async {
+    try {
+      // Get authentication token using AuthService (consistent dengan method lain)
+      String? token = await AuthService.getToken();
+      if (token == null) {
+        print('❌ No authentication token available');
+        throw Exception('Token tidak ditemukan. Silakan login ulang.');
+      }
+
+      final String url = RoutesApi.detailUrl(recipeId);
+      print('🔍 Fetching recipe detail for ID: $recipeId');
+      print('🔍 Full URL: $url');
+      print('🔍 Using token: ${token.substring(0, 10)}...');
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('🔍 Detail Response: ${response.statusCode}');
+      print('🔍 Detail Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        
+        // Parse recipe data
+        if (data != null) {
+          Recipe recipe = Recipe.fromJson(data);
+          print('✅ Loaded detailed recipe: ${recipe.title}');
+          print('✅ Ingredients count: ${recipe.cleanedIngredients.length}');
+          print('✅ Steps available: ${recipe.steps.isNotEmpty}');
+          
+          return recipe;
+        }
+      } else if (response.statusCode == 401) {
+        print('❌ Authentication failed - token may be expired');
+        
+        // Simple handling: just log and return null
+        print('⚠️ Token invalid, user may need to login again');
+        
+        // Show error message via snackbar
+        _showErrorMessage(
+          'Sesi Berakhir',
+          'Token telah berakhir. Silakan login ulang untuk melihat detail.'
+        );
+        
+        return null;
+      } else if (response.statusCode == 404) {
+        print('❌ Recipe not found');
+        return null;
+      } else {
+        print('❌ Failed to load recipe detail: ${response.statusCode}');
+        print('❌ Response: ${response.body}');
+        return null;
+      }
+      
+      return null;
+      
+    } catch (e) {
+      print('❌ Error getting recipe detail: $e');
+      return null;
     }
   }
 }

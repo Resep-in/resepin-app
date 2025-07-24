@@ -19,4 +19,5 @@ class RoutesApi {
   // recipe
   static String recommendUrl() => '$baseUrl/recipe/recommend';
   static String predictUrl() => '$baseUrl/recipe/predict';
+  static String detailUrl(int recipeId) => '$baseUrl/recipe/bookmark/detail/$recipeId';
 }
