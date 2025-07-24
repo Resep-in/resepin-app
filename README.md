@@ -49,52 +49,6 @@
 |-----------|---------------|---------------|---------|
 | ![Home](assets/screenshots/home.png) | ![Scan AI](assets/screenshots/scan.png) | ![Profile](assets/screenshots/profile.png) | ![Rekomendasi Resep](assets/screenshots/rekomendasi.png) |
 
-<!-- ## 🚀 Getting Started
-
-### Prerequisites
-
-Pastikan Anda memiliki tools berikut terinstall:
-
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (≥ 3.0.0)
-- [Dart SDK](https://dart.dev/get-dart) (≥ 2.17.0)
-- [Android Studio](https://developer.android.com/studio) atau [VS Code](https://code.visualstudio.com)
-- Android SDK dan emulator
-
-### Installation
-
-1. **Clone repository**
-   ```bash
-   git clone https://github.com/username/resepin.git
-   cd resepin
-   ```
-
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Configure API endpoint**
-   
-   Edit file `lib/api/api_controller.dart`:
-   ```dart
-   static const String baseUrl = 'YOUR_API_BASE_URL';
-   ```
-
-4. **Run the app**
-   ```bash
-   flutter run
-   ```
-
-<!-- ### Build APK
-
-Untuk build production APK:
-
-```bash
-flutter build apk --release
-```
-
-APK akan tersedia di: `build/app/outputs/flutter-apk/app-release.apk` --> -->
-
 ## 🏗️ Project Structure
 
 ```
@@ -140,27 +94,6 @@ POST /recipe/bookmark/remove
 GET  /recipe/bookmark/list
 ```
 
-<!-- ### Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-API_BASE_URL=https://your-api-domain.com/api
-API_TIMEOUT=30000
-```
-
-## 🤝 Contributing
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. -->
-
 ## 👥 Team
 
 - **AI Engineer**: Seno Aji
@@ -169,7 +102,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact & Support
 
-<!-- - **Email**: support@resepin.com -->
 - **GitHub Issues**: [Create an issue](https://github.com/username/resepin/issues)
 
 ## 🔄 Version History
@@ -182,22 +114,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Recipe search and filtering
 - ✅ Responsive UI design
 
-<!-- ## 🙏 Acknowledgments
-
-- [Flutter Team](https://flutter.dev) for the amazing framework
-- [GetX](https://pub.dev/packages/get) for state management
-- [Google Fonts](https://fonts.google.com) for beautiful typography
-- AI/ML team for ingredient recognition technology
-
-## 📱 Minimum Requirements
-
-- **Android**: 5.0 (API level 21) or higher
-- **Storage**: 50 MB free space
-- **RAM**: 2 GB minimum, 4 GB recommended
-- **Internet**: Required for AI features and recipe sync -->
-
 ---
 
-**Made with ❤️ by Tim Kosongin Dulu**
+**Made with ❤️ by Team Resepin**
 
 [![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge&logo=android)](https://drive.google.com/file/d/1FxfW5dY-lNt-W5NpOZzqJ_BhlVL0Qj5Z/view?usp=sharing)
