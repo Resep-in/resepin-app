@@ -43,7 +43,7 @@ class InfoAplikasiPage extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(width: 40), // Balance the back button
+                  SizedBox(width: 40),
                 ],
               ),
             ),
@@ -65,11 +65,11 @@ class InfoAplikasiPage extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
+                          // Logo from assets
                           Container(
-                            width: 80,
-                            height: 80,
+                            width: 100,
+                            height: 100,
                             decoration: BoxDecoration(
-                              color: AppColors.primary,
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
@@ -79,10 +79,30 @@ class InfoAplikasiPage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: Icon(
-                              Icons.restaurant_menu,
-                              size: 40,
-                              color: Colors.white,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.asset(
+                                'assets/logo-putih.png', // Ganti dengan path logo yang sesuai
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  // Fallback jika logo tidak ditemukan
+                                  return Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Icon(
+                                      Icons.restaurant_menu,
+                                      size: 50,
+                                      color: Colors.white,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                           SizedBox(height: 16),
@@ -121,7 +141,7 @@ class InfoAplikasiPage extends StatelessWidget {
                     _buildInfoCard(
                       icon: Icons.code,
                       title: "Developer",
-                      subtitle: "Tim Resepin",
+                      subtitle: "Tim Kosongin Dulu",
                       color: Colors.green,
                     ),
 
@@ -129,18 +149,9 @@ class InfoAplikasiPage extends StatelessWidget {
 
                     _buildInfoCard(
                       icon: Icons.calendar_today,
-                      title: "Tanggal Rilis",
-                      subtitle: "Januari 2025",
+                      title: "Tanggal Pembuatan",
+                      subtitle: "Juli 2025",
                       color: Colors.orange,
-                    ),
-
-                    SizedBox(height: 16),
-
-                    _buildInfoCard(
-                      icon: Icons.star_outline,
-                      title: "Rating",
-                      subtitle: "4.8 ⭐ (1.2k reviews)",
-                      color: Colors.amber,
                     ),
 
                     SizedBox(height: height * 0.04),
@@ -179,45 +190,6 @@ class InfoAplikasiPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                    ),
-
-                    SizedBox(height: height * 0.03),
-
-                    // Contact & Support
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildActionButton(
-                            icon: Icons.email_outlined,
-                            label: "Kontak",
-                            color: AppColors.primary,
-                            onTap: () {
-                              Get.snackbar(
-                                "Info",
-                                "Email: support@resepin.com",
-                                backgroundColor: Colors.blue,
-                                colorText: Colors.white,
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: _buildActionButton(
-                            icon: Icons.privacy_tip_outlined,
-                            label: "Privasi",
-                            color: Colors.grey.shade600,
-                            onTap: () {
-                              Get.snackbar(
-                                "Info",
-                                "Kebijakan privasi akan segera tersedia",
-                                backgroundColor: Colors.grey,
-                                colorText: Colors.white,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
                     ),
 
                     SizedBox(height: height * 0.03),

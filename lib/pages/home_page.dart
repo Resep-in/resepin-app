@@ -8,8 +8,50 @@ import 'package:resepin/pages/custom/custom_card_resep_bookmark.dart';
 import 'package:resepin/pages/detail_resep_page.dart';
 import 'package:resepin/theme/appColors.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  String _searchQuery = '';
+  
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query.toLowerCase().trim();
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+    });
+    _searchFocusNode.unfocus();
+  }
+
+  List<Recipe> _getFilteredBookmarks(BookmarkController bookmarkController) {
+    if (_searchQuery.isEmpty) {
+      return bookmarkController.bookmarkedRecipes;
+    }
+    
+    return bookmarkController.bookmarkedRecipes.where((recipe) {
+      return recipe.title.toLowerCase().contains(_searchQuery) ||
+             recipe.cleanedIngredients.any((ingredient) => 
+                ingredient.toLowerCase().contains(_searchQuery));
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +91,16 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: height * 0.025),
-                  // Search Bar
+                  
+                  // Search Bar with functionality
                   TextField(
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    onChanged: _onSearchChanged,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color(0xFFF6F6F6),
-                      hintText: "Cari Resep...",
+                      hintText: "Cari Resep atau Bahan...",
                       hintStyle: GoogleFonts.poppins(
                         fontSize: 14,
                         color: Colors.grey[500],
@@ -64,9 +110,26 @@ class HomePage extends StatelessWidget {
                         color: AppColors.primary,
                         size: 22,
                       ),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              onPressed: _clearSearch,
+                              icon: Icon(
+                                Icons.clear,
+                                color: Colors.grey[500],
+                                size: 20,
+                              ),
+                            )
+                          : null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
                         borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(
+                          color: AppColors.primary.withOpacity(0.5),
+                          width: 1,
+                        ),
                       ),
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: 20,
@@ -74,19 +137,51 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  
                   SizedBox(height: height * 0.02),
-                  // Section Title dengan refresh button
+                  
+                  // Section Title dengan search info
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Obx(() => Text(
-                        "Resep Bookmark (${bookmarkController.bookmarkedRecipes.length})",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
-                      )),
+                      Expanded(
+                        child: Obx(() {
+                          final filteredBookmarks = _getFilteredBookmarks(bookmarkController);
+                          final totalBookmarks = bookmarkController.bookmarkedRecipes.length;
+                          
+                          if (_searchQuery.isNotEmpty) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Hasil Pencarian",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  "${filteredBookmarks.length} dari $totalBookmarks resep",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Text(
+                              "Resep Bookmark ($totalBookmarks)",
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
+                            );
+                          }
+                        }),
+                      ),
                       IconButton(
                         onPressed: () => bookmarkController.refreshBookmarks(),
                         icon: Icon(
@@ -97,19 +192,17 @@ class HomePage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  
                   SizedBox(height: height * 0.015),
                 ],
               ),
             ),
+            
             // GridView Section (Scrollable)
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: width * 0.07),
                 child: Obx(() {
-                  // Debug info
-                  print('🏠 HOME: Loading: ${bookmarkController.isLoading.value}');
-                  print('🏠 HOME: Bookmarks count: ${bookmarkController.bookmarkedRecipes.length}');
-                  
                   if (bookmarkController.isLoading.value) {
                     return Center(
                       child: Column(
@@ -130,6 +223,8 @@ class HomePage extends StatelessWidget {
                       ),
                     );
                   }
+
+                  final filteredBookmarks = _getFilteredBookmarks(bookmarkController);
 
                   if (bookmarkController.bookmarkedRecipes.isEmpty) {
                     return Center(
@@ -176,19 +271,110 @@ class HomePage extends StatelessWidget {
                     );
                   }
 
-                  return GridView.builder(
-                    physics: BouncingScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 15,
-                      crossAxisSpacing: 15,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemCount: bookmarkController.bookmarkedRecipes.length,
-                    itemBuilder: (context, index) {
-                      final recipe = bookmarkController.bookmarkedRecipes[index];
-                      return _buildBookmarkCard(recipe, bookmarkController, context);
-                    },
+                  if (filteredBookmarks.isEmpty && _searchQuery.isNotEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 80,
+                            color: Colors.grey.shade400,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            "Tidak ada hasil",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Coba kata kunci lain untuk \"$_searchQuery\"",
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: Colors.grey.shade500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _clearSearch,
+                            child: Text(
+                              'Hapus Pencarian',
+                              style: GoogleFonts.poppins(fontSize: 12),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      // Search result info
+                      if (_searchQuery.isNotEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          margin: EdgeInsets.only(bottom: 10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "Menampilkan ${filteredBookmarks.length} resep untuk \"$_searchQuery\"",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: _clearSearch,
+                                child: Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      
+                      // Grid
+                      Expanded(
+                        child: GridView.builder(
+                          physics: BouncingScrollPhysics(),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 15,
+                            crossAxisSpacing: 15,
+                            childAspectRatio: 0.8,
+                          ),
+                          itemCount: filteredBookmarks.length,
+                          itemBuilder: (context, index) {
+                            final recipe = filteredBookmarks[index];
+                            return _buildBookmarkCard(recipe, bookmarkController, context);
+                          },
+                        ),
+                      ),
+                    ],
                   );
                 }),
               ),
@@ -198,8 +384,6 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-  // Update _buildBookmarkCard untuk handle empty ingredients:
 
   Widget _buildBookmarkCard(Recipe recipe, BookmarkController bookmarkController, BuildContext context) {
     return GestureDetector(
