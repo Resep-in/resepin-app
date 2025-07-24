@@ -1,35 +1,155 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:resepin/controllers/bookmark_controller.dart';
+import 'package:resepin/controllers/recipe_controller.dart';
 import 'package:resepin/theme/appColors.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
 
 class DetailResepPage extends StatefulWidget {
-  final String recipeName;
-  
-  const DetailResepPage({
-    super.key,
-    this.recipeName = "Nasi Goreng Seafood",
-  });
+  const DetailResepPage({super.key});
 
   @override
   State<DetailResepPage> createState() => _DetailResepPageState();
 }
 
 class _DetailResepPageState extends State<DetailResepPage> {
-  bool isFavorite = false;
+  late Recipe recipe;
+  BookmarkController? _bookmarkController;
+  RecipeController? _recipeController;
+  bool isLoadingFullData = false;
+  String dataSource = 'unknown';
 
-  final List<Map<String, dynamic>> ingredients = [
-    {"name": "Jasmine Rice", "amount": "2 Cups", "calories": "129.0"},
-    {"name": "Ketchup", "amount": "3 Tbsp", "calories": "45.0"},
-    {"name": "Sesame Oil", "amount": "2 Tbsp", "calories": "240.0"},
-    {"name": "Udang Segar", "amount": "200g", "calories": "85.0"},
-    {"name": "Cumi-cumi", "amount": "150g", "calories": "92.0"},
-    {"name": "Telur", "amount": "2 butir", "calories": "155.0"},
-    {"name": "Bawang Merah", "amount": "3 siung", "calories": "16.0"},
-    {"name": "Bawang Putih", "amount": "4 siung", "calories": "18.0"},
-    {"name": "Cabai Merah", "amount": "2 buah", "calories": "8.0"},
-    {"name": "Kecap Manis", "amount": "2 Tbsp", "calories": "35.0"},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    recipe = Get.arguments as Recipe;
+    
+    try {
+      _bookmarkController = Get.find<BookmarkController>();
+    } catch (e) {
+      _bookmarkController = Get.put(BookmarkController());
+    }
+    
+    try {
+      _recipeController = Get.find<RecipeController>();
+    } catch (e) {
+      _recipeController = Get.put(RecipeController());
+    }
+
+    _determineSourceAndLoadData();
+  }
+
+  void _determineSourceAndLoadData() async {
+    bool needsFullData = recipe.steps.isEmpty || 
+                        recipe.cleanedIngredients.isEmpty ||
+                        recipe.ingredientsServing.isEmpty;
+    
+    if (needsFullData) {
+      if (_bookmarkController?.isBookmarked(recipe.id) == true) {
+        dataSource = 'bookmark';
+      } else {
+        dataSource = 'recommendation';
+      }
+      
+      await _loadFullRecipeData();
+    } else {
+      dataSource = 'full';
+    }
+  }
+
+  Future<void> _loadFullRecipeData() async {
+    if (_recipeController == null) {
+      _showErrorMessage('Error', 'Recipe controller tidak tersedia');
+      return;
+    }
+    
+    setState(() {
+      isLoadingFullData = true;
+    });
+
+    try {
+      Recipe? fullRecipe = await _recipeController!.getRecipeDetail(recipe.id);
+      
+      if (fullRecipe != null) {
+        setState(() {
+          recipe = fullRecipe;
+        });
+        
+        Get.snackbar(
+          'Berhasil',
+          'Detail resep berhasil dimuat',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+          duration: Duration(seconds: 2),
+        );
+      } else {
+        _showLoadFailedDialog();
+      }
+    } catch (e) {
+      _showLoadFailedDialog();
+    } finally {
+      setState(() {
+        isLoadingFullData = false;
+      });
+    }
+  }
+
+  void _showLoadFailedDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: Text(
+          'Gagal Memuat Detail',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Tidak dapat memuat detail resep. Silakan coba lagi atau buka resep asli.',
+          style: GoogleFonts.poppins(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Tutup'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              _loadFullRecipeData();
+            },
+            child: Text('Coba Lagi'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              _launchURL(recipe.fullUrl);
+            },
+            child: Text('Buka Asli'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorMessage(String title, String message) {
+    Get.snackbar(
+      title,
+      message,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.TOP,
+      duration: Duration(seconds: 3),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,38 +178,85 @@ class _DetailResepPageState extends State<DetailResepPage> {
                     ),
                   ),
                   Expanded(
-                    child: Text(
-                      widget.recipeName,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                      textAlign: TextAlign.center,
+                    child: Column(
+                      children: [
+                        Text(
+                          recipe.title,
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (isLoadingFullData)
+                          Padding(
+                            padding: EdgeInsets.only(top: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Memuat detail...',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isFavorite = !isFavorite;
-                      });
-                      Get.snackbar(
-                        isFavorite ? "Bookmart" : "Dihapus", 
-                        isFavorite ? "Resep ditambahkan ke Bookmark" : "Resep dihapus dari bookmark",
-                        backgroundColor: isFavorite ? Colors.green : Colors.grey,
-                        colorText: Colors.white,
-                      );
-                    },
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.grey,
-                      size: 24,
-                    ),
-                  ),
+                  // Bookmark button
+                  _bookmarkController != null 
+                      ? Obx(() => IconButton(
+                          onPressed: () async {
+                            await _bookmarkController!.toggleBookmark(recipe);
+                            
+                            Get.snackbar(
+                              _bookmarkController!.isBookmarked(recipe.id) ? "Bookmark" : "Dihapus", 
+                              _bookmarkController!.isBookmarked(recipe.id) 
+                                  ? "Resep ditambahkan ke Bookmark" 
+                                  : "Resep dihapus dari bookmark",
+                              backgroundColor: _bookmarkController!.isBookmarked(recipe.id) 
+                                  ? Colors.green 
+                                  : Colors.grey,
+                              colorText: Colors.white,
+                            );
+                          },
+                          icon: Icon(
+                            _bookmarkController!.isBookmarked(recipe.id) 
+                                ? Icons.favorite 
+                                : Icons.favorite_border,
+                            color: _bookmarkController!.isBookmarked(recipe.id) 
+                                ? Colors.red 
+                                : Colors.grey,
+                            size: 24,
+                          ),
+                        ))
+                      : IconButton(
+                          onPressed: null,
+                          icon: Icon(
+                            Icons.favorite_border,
+                            color: Colors.grey,
+                            size: 24,
+                          ),
+                        ),
                 ],
               ),
             ),
-
             // Content
             Expanded(
               child: SingleChildScrollView(
@@ -102,155 +269,74 @@ class _DetailResepPageState extends State<DetailResepPage> {
                       margin: EdgeInsets.symmetric(horizontal: width * 0.05),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop',
-                          ),
-                          fit: BoxFit.cover,
-                          onError: (error, stackTrace) {},
-                        ),
                         color: Colors.orange.shade100,
                       ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withOpacity(0.3),
-                            ],
-                          ),
-                        ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: recipe.imageUrl.isNotEmpty
+                            ? Stack(
+                                children: [
+                                  Image.network(
+                                    recipe.imageUrl,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        color: Colors.grey.shade200,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Colors.orange.shade100,
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.restaurant,
+                                            size: 60,
+                                            color: Colors.orange.shade400,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black.withOpacity(0.3),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Container(
+                                color: Colors.orange.shade100,
+                                child: Center(
+                                  child: Icon(
+                                    Icons.restaurant,
+                                    size: 60,
+                                    color: Colors.orange.shade400,
+                                  ),
+                                ),
+                              ),
                       ),
                     ),
 
                     SizedBox(height: height * 0.03),
 
-                    // Ingredients Table Header
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: width * 0.05),
-                      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              "INGREDIENT",
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              "TAKARAN",
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              "CALORIES",
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Ingredients Table Content
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: width * 0.05),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(12),
-                          bottomRight: Radius.circular(12),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: ingredients.asMap().entries.map((entry) {
-                          int index = entry.key;
-                          Map<String, dynamic> ingredient = entry.value;
-                          
-                          return Container(
-                            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: index != ingredients.length - 1
-                                    ? BorderSide(color: Colors.grey.shade200, width: 1)
-                                    : BorderSide.none,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: Text(
-                                    ingredient["name"],
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 13,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    ingredient["amount"],
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.primary,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    "${ingredient["calories"]} cal",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.orange,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                    // Ingredients Table
+                    _buildIngredientsTable(width),
 
                     SizedBox(height: height * 0.03),
 
@@ -267,7 +353,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Total Kalori:",
+                            "Total Bahan:",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -275,7 +361,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
                             ),
                           ),
                           Text(
-                            "${_calculateTotalCalories()} cal",
+                            "${_getIngredientsCount()} item",
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -304,27 +390,35 @@ class _DetailResepPageState extends State<DetailResepPage> {
                             ),
                           ),
                           SizedBox(height: height * 0.02),
-                          _buildCookingStep(
-                            1,
-                            "Remukkan roti menjadi potongan-potongan kecil. Siram dengan air dingin, tutup dengan kain basah dan biarkan selama 30 menit.",
-                          ),
-                          _buildCookingStep(
-                            2,
-                            "Panaskan 2 sdt minyak zaitun dalam wajan yang dalam.",
-                          ),
-                          _buildCookingStep(
-                            3,
-                            "Tambahkan siung bawang putih yang sudah dipisahkan, kulitnya masih utuh, buat sayatan kecil dengan pisau untuk membukanya dan terus goreng selama 5 menit.",
-                          ),
-                          _buildCookingStep(
-                            4,
-                            "Sisihkan bawang putih. Dalam minyak yang tersisa, tempat kita menggoreng semuanya, didihkan roti, aduk terus selama 15 menit dan tambahkan lada hitam bubuk.",
-                          ),
-                          _buildCookingStep(
-                            5,
-                            "Tambahkan bawang putih, terus aduk selama sekitar 20 menit. Roti akan siap saat sudah lembut dan berwarna keemasan.",
-                          ),
+                          ..._buildCookingStepsFromAPI(),
                         ],
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.03),
+
+                    // Action Button untuk buka resep asli
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _launchURL(recipe.fullUrl),
+                        icon: Icon(Icons.open_in_new, size: 20),
+                        label: Text(
+                          "Buka Resep Asli",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
                     ),
 
@@ -337,6 +431,277 @@ class _DetailResepPageState extends State<DetailResepPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildIngredientsTable(double width) {
+    return Column(
+      children: [
+        // Ingredients Table Header
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 4,
+                child: Text(
+                  "INGREDIENT",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  "TAKARAN",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Ingredients Table Content
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: width * 0.05),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: _buildIngredientsFromAPI(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildIngredientsFromAPI() {
+    if (isLoadingFullData) {
+      return [
+        Container(
+          padding: EdgeInsets.all(16),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        ),
+      ];
+    }
+
+    if (recipe.ingredientsServing.isEmpty) {
+      return [
+        Container(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            "Tidak ada data bahan tersedia",
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+              fontStyle: FontStyle.italic,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ];
+    }
+
+    List<Map<String, String>> parsedIngredients = [];
+    
+    for (String ingredientString in recipe.ingredientsServing) {
+      try {
+        if (ingredientString.startsWith('[') && ingredientString.endsWith(']')) {
+          String jsonString = ingredientString.replaceAll("'", '"');
+          var decoded = jsonDecode(jsonString);
+          
+          if (decoded is List) {
+            for (var item in decoded) {
+              if (item is List && item.length >= 2) {
+                String quantity = item[0].toString().trim();
+                String name = item[1].toString().trim();
+                
+                parsedIngredients.add({
+                  'quantity': quantity,
+                  'name': name,
+                });
+              }
+            }
+          }
+        } else {
+          parsedIngredients.add({
+            'quantity': '',
+            'name': ingredientString,
+          });
+        }
+      } catch (e) {
+        try {
+          List<Map<String, String>> manualParsed = _manualParseIngredients(ingredientString);
+          parsedIngredients.addAll(manualParsed);
+        } catch (manualError) {
+          parsedIngredients.add({
+            'quantity': '',
+            'name': ingredientString,
+          });
+        }
+      }
+    }
+
+    if (parsedIngredients.isEmpty) {
+      return [
+        Container(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            "Gagal memproses data bahan",
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+              fontStyle: FontStyle.italic,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ];
+    }
+
+    return parsedIngredients.asMap().entries.map((entry) {
+      int index = entry.key;
+      Map<String, String> ingredient = entry.value;
+      
+      String quantity = ingredient['quantity'] ?? '';
+      String name = ingredient['name'] ?? '';
+      
+      return Container(
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: index != parsedIngredients.length - 1
+                ? BorderSide(color: Colors.grey.shade200, width: 1)
+                : BorderSide.none,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 4,
+              child: Text(
+                name,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Text(
+                quantity,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      );
+    }).toList();
+  }
+
+  List<Map<String, String>> _manualParseIngredients(String ingredientString) {
+    List<Map<String, String>> result = [];
+    
+    if (ingredientString.startsWith('[') && ingredientString.endsWith(']')) {
+      String content = ingredientString.substring(1, ingredientString.length - 1);
+      List<String> parts = content.split('], [');
+      
+      for (String part in parts) {
+        part = part.replaceAll('[', '').replaceAll(']', '');
+        List<String> elements = part.split("', '");
+        
+        if (elements.length >= 2) {
+          String quantity = elements[0].replaceAll("'", '').trim();
+          String name = elements[1].replaceAll("'", '').trim();
+          
+          result.add({
+            'quantity': quantity,
+            'name': name,
+          });
+        }
+      }
+    }
+    
+    return result;
+  }
+
+  List<Widget> _buildCookingStepsFromAPI() {
+    if (isLoadingFullData) {
+      return [
+        Container(
+          padding: EdgeInsets.all(16),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        ),
+      ];
+    }
+
+    if (recipe.steps.isEmpty) {
+      return [
+        Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            "Tidak ada petunjuk memasak tersedia. Silakan buka resep asli untuk detail lengkap.",
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+              fontStyle: FontStyle.italic,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ];
+    }
+
+    List<String> steps = recipe.steps.split('\n')
+        .where((step) => step.trim().isNotEmpty)
+        .toList();
+
+    return steps.asMap().entries.map((entry) {
+      int index = entry.key;
+      String step = entry.value.trim();
+      
+      step = step.replaceFirst(RegExp(r'^\d+\.?\s*'), '');
+      
+      return _buildCookingStep(index + 1, step);
+    }).toList();
   }
 
   Widget _buildCookingStep(int stepNumber, String instruction) {
@@ -379,11 +744,56 @@ class _DetailResepPageState extends State<DetailResepPage> {
     );
   }
 
-  String _calculateTotalCalories() {
-    double total = 0;
-    for (var ingredient in ingredients) {
-      total += double.parse(ingredient["calories"]);
+  int _getIngredientsCount() {
+    if (recipe.ingredientsServing.isEmpty) return 0;
+    
+    int totalCount = 0;
+    for (String ingredientString in recipe.ingredientsServing) {
+      try {
+        if (ingredientString.startsWith('[') && ingredientString.endsWith(']')) {
+          String jsonString = ingredientString.replaceAll("'", '"');
+          var parsed = jsonDecode(jsonString);
+          if (parsed is List) {
+            totalCount += parsed.length;
+          }
+        } else {
+          totalCount += 1;
+        }
+      } catch (e) {
+        if (ingredientString.contains('], [')) {
+          totalCount += ingredientString.split('], [').length;
+        } else {
+          totalCount += 1;
+        }
+      }
     }
-    return total.toStringAsFixed(1);
+    
+    return totalCount;
+  }
+
+  Future<void> _launchURL(String url) async {
+    try {
+      final Uri uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          'Tidak dapat membuka link resep',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Tidak dapat membuka link resep',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 }

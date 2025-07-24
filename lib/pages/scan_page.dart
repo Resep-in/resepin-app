@@ -1,10 +1,12 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:resepin/controllers/recipe_controller.dart';
 import 'package:resepin/pages/rekomendasi_page.dart';
 import 'package:resepin/theme/appColors.dart';
-import 'dart:io';
 
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -15,6 +17,8 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   final ImagePicker _picker = ImagePicker();
+  final RecipeController _recipeController = Get.put(RecipeController());
+  bool _isLocalLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,148 +29,168 @@ class _ScanPageState extends State<ScanPage> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: width * 0.07),
-          child: Column(
-            children: [
-              SizedBox(height: height * 0.05),
-              
-              Text(
-                "Chef AI Scanner",
-                style: GoogleFonts.poppins(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-              SizedBox(height: height * 0.01),
-              Text(
-                "Scan bahan makanan untuk\nrekomendasi resep terbaik",
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.grey.shade600,
-                ),
-                textAlign: TextAlign.center,
-              ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: height * 0.03),
 
-              SizedBox(height: height * 0.05),
-
-              Container(
-                width: width * 0.6,
-                height: width * 0.6,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary.withOpacity(0.1),
-                      AppColors.primary.withOpacity(0.2),
-                    ],
+                // Header
+                Text(
+                  "Scan Bahan Makanan",
+                  style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
                   ),
-                  borderRadius: BorderRadius.circular(width * 0.3),
+                  textAlign: TextAlign.center,
                 ),
-                child: Stack(
-                  children: [
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.camera_alt,
-                            size: 60,
-                            color: AppColors.primary,
-                          ),
-                          SizedBox(height: 8),
-                          Icon(
-                            Icons.auto_awesome,
-                            size: 30,
-                            color: AppColors.primary.withOpacity(0.7),
-                          ),
-                        ],
-                      ),
+
+                SizedBox(height: height * 0.01),
+
+                Text(
+                  "Ambil foto bahan makanan untuk mendapatkan rekomendasi resep",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                SizedBox(height: height * 0.04),
+
+                // Main scan area
+                Container(
+                  width: width * 0.8,
+                  height: height * 0.35,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.3),
+                      width: 2,
+                      style: BorderStyle.solid,
                     ),
-                    Positioned(
-                      top: 40,
-                      right: 40,
-                      child: Container(
-                        width: 8,
-                        height: 8,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.5),
+                          color: AppColors.primary.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 50,
-                      left: 30,
-                      child: Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.3),
-                          shape: BoxShape.circle,
+                        child: Center(
+                          child: _isLocalLoading
+                              ? CircularProgressIndicator(
+                                  color: AppColors.primary,
+                                  strokeWidth: 3,
+                                )
+                              : Icon(
+                                  Icons.camera_alt,
+                                  size: 60,
+                                  color: AppColors.primary,
+                                ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: height * 0.05),
-
-              _buildScanOption(
-                icon: Icons.camera_alt,
-                title: "Ambil Foto",
-                subtitle: "Gunakan kamera untuk foto bahan",
-                color: AppColors.primary,
-                onTap: () => _openCamera(),
-              ),
-
-              SizedBox(height: height * 0.02),
-
-              _buildScanOption(
-                icon: Icons.photo_library,
-                title: "Pilih dari Galeri",
-                subtitle: "Upload foto bahan dari galeri",
-                color: Colors.indigo,
-                onTap: () => _openGallery(),
-              ),
-
-              SizedBox(height: height * 0.03),
-
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.blue.shade200,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.lightbulb_outline,
-                      color: Colors.blue.shade700,
-                      size: 20,
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        "Tips: Pastikan foto bahan makanan terlihat jelas untuk hasil scan yang optimal",
+                      
+                      SizedBox(height: 16),
+                      
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 30,
+                        color: AppColors.primary.withOpacity(0.7),
+                      ),
+                      
+                      SizedBox(height: 8),
+                      
+                      Text(
+                        "AI akan menganalisis bahan makanan",
                         style: GoogleFonts.poppins(
                           fontSize: 12,
-                          color: Colors.blue.shade700,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: height * 0.05),
+
+                // Scan options
+                _buildScanOption(
+                  icon: Icons.camera_alt,
+                  title: "Ambil Foto",
+                  subtitle: "Gunakan kamera untuk foto bahan",
+                  color: AppColors.primary,
+                  onTap: _isLocalLoading ? null : () => _openCamera(),
+                  isDisabled: _isLocalLoading,
+                ),
+
+                SizedBox(height: height * 0.02),
+
+                _buildScanOption(
+                  icon: Icons.photo_library,
+                  title: "Pilih dari Galeri",
+                  subtitle: "Upload foto bahan dari galeri",
+                  color: Colors.indigo,
+                  onTap: _isLocalLoading ? null : () => _openGallery(),
+                  isDisabled: _isLocalLoading,
+                ),
+
+                SizedBox(height: height * 0.03),
+
+                // Tips section
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade200, width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.lightbulb_outline,
+                        color: Colors.blue.shade700,
+                        size: 20,
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Tips untuk hasil terbaik:",
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade700,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "• Pastikan pencahayaan cukup\n• Foto dari jarak yang tidak terlalu jauh\n• Bahan makanan terlihat jelas",
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.blue.shade600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-
-              SizedBox(height: height * 0.05),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -178,40 +202,42 @@ class _ScanPageState extends State<ScanPage> {
     required String title,
     required String subtitle,
     required Color color,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
+    bool isDisabled = false,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: double.infinity,
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDisabled ? Colors.grey.shade100 : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: color.withOpacity(0.3),
+            color: isDisabled ? Colors.grey.shade300 : color,
             width: 2,
           ),
-          boxShadow: [
+          boxShadow: isDisabled ? [] : [
             BoxShadow(
               color: color.withOpacity(0.1),
-              blurRadius: 10,
-              offset: Offset(0, 4),
+              spreadRadius: 1,
+              blurRadius: 8,
+              offset: Offset(0, 2),
             ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(16),
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: isDisabled ? Colors.grey.shade300 : color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
-                size: 32,
-                color: color,
+                color: isDisabled ? Colors.grey.shade500 : color,
+                size: 30,
               ),
             ),
             SizedBox(width: 16),
@@ -224,7 +250,7 @@ class _ScanPageState extends State<ScanPage> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: isDisabled ? Colors.grey.shade500 : Colors.black,
                     ),
                   ),
                   SizedBox(height: 4),
@@ -232,7 +258,8 @@ class _ScanPageState extends State<ScanPage> {
                     subtitle,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w400,
+                      color: isDisabled ? Colors.grey.shade400 : Colors.grey.shade600,
                     ),
                   ),
                 ],
@@ -240,7 +267,7 @@ class _ScanPageState extends State<ScanPage> {
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: color,
+              color: isDisabled ? Colors.grey.shade400 : color,
               size: 20,
             ),
           ],
@@ -249,130 +276,143 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 
-  void _showLoadingDialog(String message) {
-    Get.dialog(
-      PopScope(
-        canPop: false,
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(
-                  color: AppColors.primary,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  message,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      barrierDismissible: false,
-    );
-  }
-
   Future<void> _openCamera() async {
     try {
-      _showLoadingDialog("Membuka kamera...");
-      
       final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 80,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
       );
 
-      Get.back();
-
       if (image != null) {
-        _processImage(image, "camera");
-      } else {
-        Get.snackbar(
-          "Info",
-          "Tidak ada foto yang diambil",
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
+        await _processImage(File(image.path), "camera");
       }
     } catch (e) {
-      Get.back();
+      print('Error opening camera: $e');
       Get.snackbar(
-        "Error",
-        "Gagal membuka kamera: $e",
+        'Error',
+        'Gagal membuka kamera. Periksa izin akses kamera.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
       );
     }
   }
 
   Future<void> _openGallery() async {
     try {
-      _showLoadingDialog("Membuka galeri...");
-      
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 80,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
       );
 
-      Get.back();
-
       if (image != null) {
-        _processImage(image, "gallery");
-      } else {
-        Get.snackbar(
-          "Info",
-          "Tidak ada foto yang dipilih",
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
+        await _processImage(File(image.path), "gallery");
       }
     } catch (e) {
-      Get.back();
+      print('Error opening gallery: $e');
       Get.snackbar(
-        "Error",
-        "Gagal membuka galeri: $e",
+        'Error',
+        'Gagal membuka galeri. Periksa izin akses penyimpanan.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
       );
     }
   }
 
-  void _processImage(XFile image, String source) {
-    _showLoadingDialog("AI sedang menganalisis bahan makanan...");
-
-    Future.delayed(Duration(seconds: 3), () {
-      Get.back();
-      
-      Get.snackbar(
-        "Berhasil!",
-        "Bahan makanan berhasil diidentifikasi",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: Duration(seconds: 2),
-      );
-
-      Future.delayed(Duration(seconds: 2), () {
-        Get.to(
-          () => RekomendasiPage(),
-          transition: Transition.rightToLeft,
-          duration: Duration(milliseconds: 300),
-        );
-      });
+  Future<void> _processImage(File imageFile, String source) async {
+    setState(() {
+      _isLocalLoading = true;
     });
+
+    _showLoadingDialog("AI sedang menganalisis gambar dan mencari resep...");
+
+    Future.microtask(() async {
+      bool success = await _recipeController.getRecipeRecommendations(imageFile);
+      
+      if (mounted) {
+        setState(() {
+          _isLocalLoading = false;
+        });
+        
+        Get.back();
+        
+        if (success && _recipeController.hasRecommendations) {
+          Future.delayed(Duration(seconds: 1), () {
+            if (mounted) {
+              Get.to(
+                () => RekomendasiPage(
+                  detectedIngredients: _recipeController.detectedIngredients.toList(),
+                ),
+                transition: Transition.rightToLeft,
+                duration: Duration(milliseconds: 300),
+              );
+            }
+          });
+        }
+      }
+    });
+  }
+
+  void _showLoadingDialog(String message) {
+    Get.dialog(
+      barrierDismissible: false,
+      AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: AppColors.primary),
+            SizedBox(height: 16),
+            Text(
+              message,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDetailedResponse() {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Debug Info'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Detected Ingredients:'),
+              Text(_recipeController.detectedIngredients.join('\n')),
+              SizedBox(height: 16),
+              Text('Recipes Count: ${_recipeController.recommendedRecipes.length}'),
+              if (_recipeController.recommendedRecipes.isNotEmpty) ...[
+                SizedBox(height: 16),
+                Text('First Recipe:'),
+                Text(_recipeController.recommendedRecipes.first.title),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: Text('Close')),
+          TextButton(
+            onPressed: () {
+              _recipeController.debugPrintCurrentState();
+              Get.back();
+            },
+            child: Text('Print to Console'),
+          ),
+        ],
+      ),
+    );
   }
 }
