@@ -4,35 +4,35 @@
 [![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 [![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 
-**Resepin** adalah aplikasi resep makanan yang didukung oleh artificial intelligence (AI). Dapatkan resep berdasarkan bahan-bahan yang tersedia di rumah tanpa perlu repot mencari secara manual. Ubah gaya hidup Anda menjadi lebih mudah dan lezat dengan Resepin.
+**Resepin** is a recipe application powered by artificial intelligence (AI). Get recipes based on the ingredients you have at home without the hassle of searching manually. Transform your lifestyle to be more convenient and delicious with Resepin.
 
-> ⚠️ **Disclaimer**: AI dapat menghasilkan data yang tidak akurat, jadi pastikan untuk memeriksa kembali resep yang dihasilkan.
+> ⚠️ **Disclaimer**: AI can generate inaccurate data, so please double-check the generated recipes.
 
 ## 📱 Download APK
 
 **[📥 Download Resepin APK](https://drive.google.com/file/d/1FxfW5dY-lNt-W5NpOZzqJ_BhlVL0Qj5Z/view?usp=sharing)**
 
-## ✨ Fitur Utama
+## ✨ Key Features
 
 ### 🔍 **AI-Powered Recipe Recommendation**
-- Upload foto bahan makanan yang Anda miliki
-- AI akan mengenali bahan dan memberikan rekomendasi resep
-- Teknologi machine learning untuk prediksi resep yang akurat
+- Upload photos of ingredients you have
+- AI will recognize ingredients and provide recipe recommendations
+- Machine learning technology for accurate recipe predictions
 
 ### 📖 **Recipe Management**
-- Lihat detail resep lengkap dengan bahan dan cara memasak
-- Bookmark resep favorit untuk akses cepat
-- Search dan filter resep berdasarkan nama atau bahan
+- View complete recipe details with ingredients and cooking instructions
+- Bookmark favorite recipes for quick access
+- Search and filter recipes by name or ingredients
 
 ### 👤 **User Authentication**
-- Register dan login dengan email
-- Profil pengguna yang dapat diedit
-- Sinkronisasi bookmark antar device
+- Register and login with email
+- Editable user profile
+- Bookmark synchronization across devices
 
 ### 🔎 **Smart Search**
-- Pencarian real-time di bookmark
-- Filter berdasarkan nama resep atau bahan
-- Hasil pencarian yang relevan dan cepat
+- Real-time search in bookmarks
+- Filter by recipe name or ingredients
+- Relevant and fast search results
 
 ## 🛠️ Tech Stack
 
@@ -45,9 +45,9 @@
 
 ## 📸 Screenshots
 
-| Home Page | Recipe Detail | Camera Upload | Profile |
-|-----------|---------------|---------------|---------|
-| ![Home](assets/screenshots/home.png) | ![Scan AI](assets/screenshots/scan.png) | ![Profile](assets/screenshots/profile.png) | ![Rekomendasi Resep](assets/screenshots/rekomendasi.png) |
+| Home Page | AI Scan | Profile | Recipe Recommendation |
+|-----------|---------|---------|----------------------|
+| ![Home](assets/screenshots/home.png) | ![Scan AI](assets/screenshots/scan.png) | ![Profile](assets/screenshots/profile.png) | ![Recipe Recommendation](assets/screenshots/rekomendasi.png) |
 
 ## 🏗️ Project Structure
 
@@ -106,7 +106,7 @@ GET  /recipe/bookmark/list
 
 ## 🔄 Version History
 
-### v1.0.0 (Juli 2025)
+### v1.0.0 (July 2025)
 - ✅ Initial release
 - ✅ AI-powered recipe recommendation
 - ✅ User authentication system
