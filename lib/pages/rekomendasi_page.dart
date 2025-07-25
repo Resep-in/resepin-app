@@ -50,7 +50,7 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
                   ),
                   Expanded(
                     child: Text(
-                      "Rekomendasi Resep",
+                      "Recomendation Recipes",
                       style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
@@ -87,7 +87,7 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
                           ),
                           SizedBox(width: 8),
                           Text(
-                            "Bahan yang Terdeteksi:",
+                            "Detected Substances:",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -123,7 +123,7 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
                         Padding(
                           padding: EdgeInsets.only(top: 8),
                           child: Text(
-                            "+${_recipeController.detectedIngredients.length - 10} bahan lainnya",
+                            "+${_recipeController.detectedIngredients.length - 10} other ingredients",
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               color: Colors.green.shade600,
@@ -181,7 +181,7 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
                         CircularProgressIndicator(color: AppColors.primary),
                         SizedBox(height: 16),
                         Text(
-                          "Mencari rekomendasi resep...",
+                          "Searching for recipe recommendations...",
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             color: Colors.grey.shade600,
@@ -204,7 +204,7 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
                         ),
                         SizedBox(height: 16),
                         Text(
-                          "Tidak ada rekomendasi resep ditemukan",
+                          "No recipe recommendations found",
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -213,7 +213,7 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          "Coba dengan gambar bahan makanan yang berbeda",
+                          "Try using different food ingredient images",
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             color: Colors.grey.shade500,
@@ -232,7 +232,7 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
                             ),
                           ),
                           child: Text(
-                            "Coba Lagi",
+                            "Try Again",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -260,7 +260,7 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
                       // Convert Recipe object to Map untuk sesuai dengan format UI awal
                       Map<String, dynamic> recipeMap = {
                         'title': recipe.title,
-                        'calories': '${recipe.cleanedIngredients.length} bahan',
+                        'calories': '${recipe.cleanedIngredients.length} ingredients',
                         'tag': _getRecipeTag(recipe),
                       };
                       return _buildRecipeCard(recipeMap, recipe);
@@ -289,7 +289,7 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
         );
         Get.snackbar(
           "Info",
-          "Membuka resep ${recipe['title']}",
+          "Opening recipe ${recipe['title']}",
           backgroundColor: AppColors.primary,
           colorText: Colors.white,
         );
@@ -467,17 +467,17 @@ class _RekomendasiPageState extends State<RekomendasiPage> {
   // Helper method untuk mendapatkan warna tag
   Color _getTagColor(String tag) {
     switch (tag.toLowerCase()) {
-      case 'ayam':
+      case 'chicken':
         return Colors.orange;
-      case 'daging':
+      case 'beef':
         return Colors.red;
-      case 'ikan':
+      case 'fish':
         return Colors.blue;
-      case 'sayuran':
+      case 'vegetable':
         return Colors.green;
-      case 'nasi':
+      case 'rice':
         return Colors.amber;
-      case 'sup':
+      case 'soup':
         return Colors.indigo;
       case 'dessert':
         return Colors.pink;
