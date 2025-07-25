@@ -38,7 +38,7 @@ class _ScanPageState extends State<ScanPage> {
 
                 // Header
                 Text(
-                  "Scan Bahan Makanan",
+                  "Scan Ingredients",
                   style: GoogleFonts.poppins(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -50,7 +50,7 @@ class _ScanPageState extends State<ScanPage> {
                 SizedBox(height: height * 0.01),
 
                 Text(
-                  "Ambil foto bahan makanan untuk mendapatkan rekomendasi resep",
+                  "Take photos of ingredients to get recipe recommendations.",
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -109,7 +109,7 @@ class _ScanPageState extends State<ScanPage> {
                       SizedBox(height: 8),
                       
                       Text(
-                        "AI akan menganalisis bahan makanan",
+                        "AI will analyze the ingredients",
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -126,8 +126,8 @@ class _ScanPageState extends State<ScanPage> {
                 // Scan options
                 _buildScanOption(
                   icon: Icons.camera_alt,
-                  title: "Ambil Foto",
-                  subtitle: "Gunakan kamera untuk foto bahan",
+                  title: "Take Photo",
+                  subtitle: "Use the camera to take a photo of the ingredients",
                   color: AppColors.primary,
                   onTap: _isLocalLoading ? null : () => _openCamera(),
                   isDisabled: _isLocalLoading,
@@ -137,8 +137,8 @@ class _ScanPageState extends State<ScanPage> {
 
                 _buildScanOption(
                   icon: Icons.photo_library,
-                  title: "Pilih dari Galeri",
-                  subtitle: "Upload foto bahan dari galeri",
+                  title: "Select from Gallery",
+                  subtitle: "Upload a photo of the ingredients from the gallery",
                   color: Colors.indigo,
                   onTap: _isLocalLoading ? null : () => _openGallery(),
                   isDisabled: _isLocalLoading,
@@ -167,7 +167,7 @@ class _ScanPageState extends State<ScanPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Tips untuk hasil terbaik:",
+                              "Tips for the best results:",
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -176,7 +176,7 @@ class _ScanPageState extends State<ScanPage> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              "• Pastikan pencahayaan cukup\n• Foto dari jarak yang tidak terlalu jauh\n• Bahan makanan terlihat jelas",
+                              "• Make sure the lighting is sufficient\n• Take the photo from a reasonable distance\n• Ingredients should be clearly visible",
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w400,
@@ -292,7 +292,7 @@ class _ScanPageState extends State<ScanPage> {
       print('Error opening camera: $e');
       Get.snackbar(
         'Error',
-        'Gagal membuka kamera. Periksa izin akses kamera.',
+        'Failed to open camera. Check camera access permissions.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -316,7 +316,7 @@ class _ScanPageState extends State<ScanPage> {
       print('Error opening gallery: $e');
       Get.snackbar(
         'Error',
-        'Gagal membuka galeri. Periksa izin akses penyimpanan.',
+        'Failed to open gallery. Check storage access permissions.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -329,7 +329,7 @@ class _ScanPageState extends State<ScanPage> {
       _isLocalLoading = true;
     });
 
-    _showLoadingDialog("AI sedang menganalisis gambar dan mencari resep...");
+    _showLoadingDialog("AI is analyzing the image and searching for recipes...");
 
     Future.microtask(() async {
       bool success = await _recipeController.getRecipeRecommendations(imageFile);
