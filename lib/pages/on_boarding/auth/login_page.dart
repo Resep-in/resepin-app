@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     SizedBox(height: height * 0.025),
                     Text(
-                      "Silahkan Masukkan Email dan Password anda",
+                      "Please enter your email and password",
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontSize: 16,
@@ -104,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                                   controller: _emailController,
                                   keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
-                                    hintText: "Masukkan Email",
+                                    hintText: "Please enter your email",
                                     hintStyle: GoogleFonts.poppins(
                                       color: Colors.grey,
                                       fontSize: 14,
@@ -139,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                                   controller: _passwordController,
                                   obscureText: _obsecurePassword,
                                   decoration: InputDecoration(
-                                    hintText: "Masukkan Password",
+                                    hintText: "Please enter your password",
                                     hintStyle: GoogleFonts.poppins(
                                       color: Colors.grey,
                                       fontSize: 14,
@@ -238,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Belum punya akun?",
+                                    "Don't have an account?",
                                     style: GoogleFonts.poppins(
                                       color: Colors.black,
                                       fontSize: 15,

@@ -63,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: height * 0.025),
               Text(
-                "Silahkan daftar untuk memulai",
+                "Please register to get started",
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontSize: 16,
@@ -90,9 +90,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: [
                         SizedBox(height: height * 0.05),
 
-                        // Nama Field
+                        // Name Field
                         Text(
-                          "Nama Lengkap",
+                          "Full Name",
                           style: GoogleFonts.poppins(
                             color: Colors.black,
                             fontSize: 16,
@@ -108,7 +108,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           child: TextField(
                             controller: _nameController,
                             decoration: InputDecoration(
-                              hintText: "Masukkan nama lengkap",
+                              hintText: "Please enter your name",
                               hintStyle: GoogleFonts.poppins(
                                 color: Colors.grey,
                                 fontSize: 14,
@@ -142,7 +142,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
-                              hintText: "Masukkan Email",
+                              hintText: "Please enter your email",
                               hintStyle: GoogleFonts.poppins(
                                 color: Colors.grey,
                                 fontSize: 14,
@@ -176,7 +176,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             controller: _passwordController,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
-                              hintText: "Masukkan Password",
+                              hintText: "Please enter your password",
                               hintStyle: GoogleFonts.poppins(
                                 color: Colors.grey,
                                 fontSize: 14,
@@ -207,7 +207,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                         // Confirm Password Field
                         Text(
-                          "Konfirmasi Password",
+                          "Confirm Password",
                           style: GoogleFonts.poppins(
                             color: Colors.black,
                             fontSize: 16,
@@ -224,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             controller: _confirmPasswordController,
                             obscureText: _obscureConfirmPassword,
                             decoration: InputDecoration(
-                              hintText: "Konfirmasi Password",
+                              hintText: "Please confirm your password",
                               hintStyle: GoogleFonts.poppins(
                                 color: Colors.grey,
                                 fontSize: 14,
@@ -296,7 +296,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Sudah punya akun? ",
+                              "I have an account? ",
                               style: GoogleFonts.poppins(
                                 color: Colors.black,
                                 fontSize: 15,
