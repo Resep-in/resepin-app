@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   SizedBox(height: height * 0.005),
                   Text(
-                    "Mau masak apa hari ini?",
+                    "What do you want to cook today?",
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
@@ -100,7 +100,7 @@ class _HomePageState extends State<HomePage> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color(0xFFF6F6F6),
-                      hintText: "Cari Resep atau Bahan...",
+                      hintText: "Search Recipes or Ingredients...",
                       hintStyle: GoogleFonts.poppins(
                         fontSize: 14,
                         color: Colors.grey[500],
@@ -154,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Hasil Pencarian",
+                                  "Search Results",
                                   style: GoogleFonts.poppins(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 Text(
-                                  "${filteredBookmarks.length} dari $totalBookmarks resep",
+                                  "${filteredBookmarks.length} from $totalBookmarks recipes",
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                             );
                           } else {
                             return Text(
-                              "Resep Bookmark ($totalBookmarks)",
+                              "Bookmarked Recipes ($totalBookmarks)",
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -213,7 +213,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           SizedBox(height: 16),
                           Text(
-                            'Memuat bookmark...',
+                            'Loading bookmarks...',
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: Colors.grey.shade600,
@@ -238,7 +238,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           SizedBox(height: 16),
                           Text(
-                            "Belum ada resep bookmark",
+                            "No bookmarked recipes",
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -247,7 +247,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            "Tambahkan resep ke bookmark untuk melihatnya di sini",
+                            "Add recipes to bookmarks to see them here",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: Colors.grey.shade500,
@@ -258,7 +258,7 @@ class _HomePageState extends State<HomePage> {
                           ElevatedButton(
                             onPressed: () => bookmarkController.refreshBookmarks(),
                             child: Text(
-                              'Refresh Bookmark',
+                              'Refresh Bookmarks',
                               style: GoogleFonts.poppins(fontSize: 12),
                             ),
                             style: ElevatedButton.styleFrom(
@@ -283,7 +283,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           SizedBox(height: 16),
                           Text(
-                            "Tidak ada hasil",
+                            "No results found",
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -292,7 +292,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            "Coba kata kunci lain untuk \"$_searchQuery\"",
+                            "Try another keyword for \"$_searchQuery\"",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: Colors.grey.shade500,
@@ -303,7 +303,7 @@ class _HomePageState extends State<HomePage> {
                           ElevatedButton(
                             onPressed: _clearSearch,
                             child: Text(
-                              'Hapus Pencarian',
+                              'Clear Search',
                               style: GoogleFonts.poppins(fontSize: 12),
                             ),
                             style: ElevatedButton.styleFrom(
@@ -338,7 +338,7 @@ class _HomePageState extends State<HomePage> {
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  "Menampilkan ${filteredBookmarks.length} resep untuk \"$_searchQuery\"",
+                                  "Showing ${filteredBookmarks.length} recipes for \"$_searchQuery\"",
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: AppColors.primary,
