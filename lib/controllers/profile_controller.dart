@@ -24,7 +24,7 @@ class ProfileController extends GetxController {
       if (token == null) {
         Get.snackbar(
           'Error',
-          'Token tidak ditemukan. Silakan login ulang.',
+          'Token not found. Please login again.',
           backgroundColor: Colors.red,
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP,
@@ -74,8 +74,8 @@ class ProfileController extends GetxController {
           }
 
           Get.snackbar(
-            'Berhasil',
-            responseData['message'] ?? 'Profile berhasil diperbarui',
+            'Success',
+            responseData['message'] ?? 'Profile updated successfully',
             backgroundColor: Colors.green,
             colorText: Colors.white,
             snackPosition: SnackPosition.TOP,
@@ -85,7 +85,7 @@ class ProfileController extends GetxController {
         } else {
           Get.snackbar(
             'Error',
-            responseData['message'] ?? 'Gagal memperbarui profile',
+            responseData['message'] ?? 'Failed to update profile',
             backgroundColor: Colors.red,
             colorText: Colors.white,
             snackPosition: SnackPosition.TOP,
@@ -94,7 +94,7 @@ class ProfileController extends GetxController {
         }
       } else {
         final Map<String, dynamic> errorData = jsonDecode(response.body);
-        String errorMessage = 'Gagal memperbarui profile';
+        String errorMessage = 'Failed to update profile';
 
         if (errorData['errors'] != null) {
           Map<String, dynamic> errors = errorData['errors'];
@@ -127,7 +127,7 @@ class ProfileController extends GetxController {
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Terjadi kesalahan koneksi. Periksa internet Anda.',
+        'Connection error occurred. Please check your internet connection.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -147,7 +147,7 @@ class ProfileController extends GetxController {
     if (name.trim().isEmpty) {
       Get.snackbar(
         'Error',
-        'Nama tidak boleh kosong',
+        'Name cannot be empty',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -158,7 +158,7 @@ class ProfileController extends GetxController {
     if (name.trim().length < 2) {
       Get.snackbar(
         'Error',
-        'Nama minimal 2 karakter',
+        'Name must be at least 2 characters',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -169,7 +169,7 @@ class ProfileController extends GetxController {
     if (email.trim().isEmpty) {
       Get.snackbar(
         'Error',
-        'Email tidak boleh kosong',
+        'Email cannot be empty',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -180,7 +180,7 @@ class ProfileController extends GetxController {
     if (!GetUtils.isEmail(email.trim())) {
       Get.snackbar(
         'Error',
-        'Format email tidak valid',
+        'Invalid email format',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,

@@ -342,7 +342,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Total Bahan:",
+                            "Total Ingredients:",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -384,34 +384,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
                       ),
                     ),
 
-                    SizedBox(height: height * 0.03),
-
-                    // Action Button untuk buka resep asli
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: width * 0.05),
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _launchURL(recipe.fullUrl),
-                        icon: Icon(Icons.open_in_new, size: 20),
-                        label: Text(
-                          "Open Original Recipe",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: height * 0.03),
+                    SizedBox(height: height * 0.03), 
                   ],
                 ),
               ),
@@ -449,7 +422,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
               Expanded(
                 flex: 3,
                 child: Text(
-                  "DOSE",
+                  "SERVING",
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

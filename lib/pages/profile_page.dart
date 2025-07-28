@@ -90,7 +90,7 @@ class ProfilePage extends StatelessWidget {
                 },
               ),
               CustomMenuProfile(
-                title: 'Info Application',
+                title: 'Application Info',
                 icon: Icons.info,
                 onTap: () {
                   Get.to(() => InfoAplikasiPage());

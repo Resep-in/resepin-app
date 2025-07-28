@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
     
     return bookmarkController.bookmarkedRecipes.where((recipe) {
       return recipe.title.toLowerCase().contains(_searchQuery) ||
-             recipe.cleanedIngredients.any((ingredient) => 
+            recipe.cleanedIngredients.any((ingredient) => 
                 ingredient.toLowerCase().contains(_searchQuery));
     }).toList();
   }
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Halo ${authController.currentUser.value?.name ?? "User"}",
+                    "Hello ${authController.currentUser.value?.name ?? "User"}",
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
