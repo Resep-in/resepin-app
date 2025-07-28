@@ -43,7 +43,7 @@ class BookmarkController extends GetxController {
       
       final token = _getToken();
       if (token == null) {
-        _showErrorMessage('Error', 'Silakan login terlebih dahulu');
+        _showErrorMessage('Error', 'Please login first');
         return false;
       }
 
@@ -68,25 +68,25 @@ class BookmarkController extends GetxController {
             bookmarkedRecipeIds.add(recipe.id);
           }
           
-          _showSuccessMessage('Bookmark', 'Resep berhasil ditambahkan ke bookmark');
+          _showSuccessMessage('Bookmark', 'Recipe successfully added to bookmarks');
           return true;
         }
       } else if (response.statusCode == 401) {
-        _showErrorMessage('Error', 'Token tidak valid. Silakan login ulang');
+        _showErrorMessage('Error', 'Invalid token. Please login again');
         _authController.logout();
         return false;
       } else if (response.statusCode == 422) {
         final data = jsonDecode(response.body);
-        String errorMsg = data['message'] ?? 'Gagal menambahkan bookmark';
+        String errorMsg = data['message'] ?? 'Failed to add bookmark';
         _showErrorMessage('Error', errorMsg);
         return false;
       }
       
-      _showErrorMessage('Error', 'Gagal menambahkan bookmark');
+      _showErrorMessage('Error', 'Failed to add bookmark');
       return false;
       
     } catch (e) {
-      _showErrorMessage('Error', 'Terjadi kesalahan saat menambahkan bookmark');
+      _showErrorMessage('Error', 'An error occurred while adding bookmark');
       return false;
     } finally {
       isLoading.value = false;
@@ -99,7 +99,7 @@ class BookmarkController extends GetxController {
       
       final token = _getToken();
       if (token == null) {
-        _showErrorMessage('Error', 'Silakan login terlebih dahulu');
+        _showErrorMessage('Error', 'Please login first');
         return false;
       }
 
@@ -122,20 +122,20 @@ class BookmarkController extends GetxController {
           bookmarkedRecipes.removeWhere((recipe) => recipe.id == recipeId);
           bookmarkedRecipeIds.remove(recipeId);
           
-          _showSuccessMessage('Bookmark', 'Resep berhasil dihapus dari bookmark');
+          _showSuccessMessage('Bookmark', 'Recipe successfully removed from bookmarks');
           return true;
         }
       } else if (response.statusCode == 401) {
-        _showErrorMessage('Error', 'Token tidak valid. Silakan login ulang');
+        _showErrorMessage('Error', 'Invalid token. Please login again');
         _authController.logout();
         return false;
       }
       
-      _showErrorMessage('Error', 'Gagal menghapus bookmark');
+      _showErrorMessage('Error', 'Failed to remove bookmark');
       return false;
       
     } catch (e) {
-      _showErrorMessage('Error', 'Terjadi kesalahan saat menghapus bookmark');
+      _showErrorMessage('Error', 'An error occurred while removing bookmark');
       return false;
     } finally {
       isLoading.value = false;
@@ -248,7 +248,7 @@ class BookmarkController extends GetxController {
         final RecipeController recipeController = Get.put(RecipeController());
         return await recipeController.getRecipeDetail(recipeId);
       } catch (e2) {
-        _showErrorMessage('Error', 'Terjadi kesalahan saat memuat detail resep');
+        _showErrorMessage('Error', 'Failed to load recipe details');
         return null;
       }
     }

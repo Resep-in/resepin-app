@@ -83,14 +83,14 @@ class ProfilePage extends StatelessWidget {
                 },
               ),
               CustomMenuProfile(
-                title: 'Edit Password',
+                title: 'Change Password',
                 icon: Icons.lock,
                 onTap: () {
                   Get.to(() => EditPasswordPage());
                 },
               ),
               CustomMenuProfile(
-                title: 'Info Aplikasi',
+                title: 'Application Info',
                 icon: Icons.info,
                 onTap: () {
                   Get.to(() => InfoAplikasiPage());
@@ -238,14 +238,14 @@ class ProfilePage extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
         ),
         title: Text(
-          'Konfirmasi Logout',
+          'Confirm Logout',
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         content: Text(
-          'Apakah Anda yakin ingin keluar dari aplikasi?',
+          'Are you sure you want to log out of the application?',
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: Colors.grey.shade600,
@@ -255,7 +255,7 @@ class ProfilePage extends StatelessWidget {
           TextButton(
             onPressed: () => Get.back(),
             child: Text(
-              'Batal',
+              'Cancel',
               style: GoogleFonts.poppins(
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
@@ -301,7 +301,7 @@ class ProfilePage extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              'Sedang logout...',
+              'Logging out...',
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Colors.grey.shade600,
@@ -326,7 +326,7 @@ class ProfilePage extends StatelessWidget {
       
       Get.snackbar(
         'Error',
-        'Terjadi kesalahan saat logout',
+        'An error occurred while logging out',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,

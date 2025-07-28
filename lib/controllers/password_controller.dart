@@ -20,7 +20,7 @@ class PasswordController extends GetxController {
       if (token == null) {
         Get.snackbar(
           'Error',
-          'Token tidak ditemukan. Silakan login ulang.',
+          'Token not found. Please login again.',
           backgroundColor: Colors.red,
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP,
@@ -57,8 +57,8 @@ class PasswordController extends GetxController {
             responseData['success'] == true) {
           
           Get.snackbar(
-            'Berhasil',
-            responseData['message'] ?? 'Password berhasil diubah',
+            'Success',
+            responseData['message'] ?? 'Password changed successfully',
             backgroundColor: Colors.green,
             colorText: Colors.white,
             snackPosition: SnackPosition.TOP,
@@ -68,7 +68,7 @@ class PasswordController extends GetxController {
         } else {
           Get.snackbar(
             'Error',
-            responseData['message'] ?? 'Gagal mengubah password',
+            responseData['message'] ?? 'Failed to change password',
             backgroundColor: Colors.red,
             colorText: Colors.white,
             snackPosition: SnackPosition.TOP,
@@ -77,7 +77,7 @@ class PasswordController extends GetxController {
         }
       } else {
         final Map<String, dynamic> errorData = jsonDecode(response.body);
-        String errorMessage = 'Gagal mengubah password';
+        String errorMessage = 'Failed to change password';
 
         // Handle validation errors
         if (errorData['errors'] != null) {
@@ -113,7 +113,7 @@ class PasswordController extends GetxController {
       
       Get.snackbar(
         'Error',
-        'Terjadi kesalahan koneksi. Periksa internet Anda.',
+        'Connection error occurred. Please check your internet connection.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -134,7 +134,7 @@ class PasswordController extends GetxController {
     if (oldPassword.trim().isEmpty) {
       Get.snackbar(
         'Error',
-        'Password lama tidak boleh kosong',
+        'Current password cannot be empty',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -145,7 +145,7 @@ class PasswordController extends GetxController {
     if (newPassword.trim().isEmpty) {
       Get.snackbar(
         'Error',
-        'Password baru tidak boleh kosong',
+        'New password cannot be empty',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -156,7 +156,7 @@ class PasswordController extends GetxController {
     if (newPassword.trim().length < 6) {
       Get.snackbar(
         'Error',
-        'Password baru minimal 6 karakter',
+        'New password must be at least 6 characters',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -167,7 +167,7 @@ class PasswordController extends GetxController {
     if (confirmPassword.trim().isEmpty) {
       Get.snackbar(
         'Error',
-        'Konfirmasi password tidak boleh kosong',
+        'Password confirmation cannot be empty',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -178,7 +178,7 @@ class PasswordController extends GetxController {
     if (newPassword.trim() != confirmPassword.trim()) {
       Get.snackbar(
         'Error',
-        'Konfirmasi password tidak cocok',
+        'Password confirmation does not match',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -189,7 +189,7 @@ class PasswordController extends GetxController {
     if (oldPassword.trim() == newPassword.trim()) {
       Get.snackbar(
         'Error',
-        'Password baru harus berbeda dari password lama',
+        'New password must be different from current password',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,

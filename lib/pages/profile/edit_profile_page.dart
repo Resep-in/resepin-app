@@ -71,7 +71,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               SizedBox(height: 20),
               Text(
-                "Pilih Foto Profile",
+                "Select Profile Photo",
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -83,18 +83,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 children: [
                   _buildImageSourceOption(
                     icon: Icons.camera_alt,
-                    label: "Kamera",
+                    label: "Camera",
                     onTap: () => _pickImage(ImageSource.camera),
                   ),
                   _buildImageSourceOption(
                     icon: Icons.photo_library,
-                    label: "Galeri",
+                    label: "Gallery",
                     onTap: () => _pickImage(ImageSource.gallery),
                   ),
                   if (_selectedImage != null)
                     _buildImageSourceOption(
                       icon: Icons.delete,
-                      label: "Hapus",
+                      label: "Remove",
                       onTap: _removeImage,
                       color: Colors.red,
                     ),
@@ -156,7 +156,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         Get.back();
         Get.snackbar(
           "Success",
-          "Foto berhasil dipilih",
+          "Photo selected successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP,
@@ -165,7 +165,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     } catch (e) {
       Get.snackbar(
         "Error",
-        "Gagal memilih foto: $e",
+        "Failed to select photo: $e",
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -180,7 +180,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     Get.back();
     Get.snackbar(
       "Success",
-      "Foto berhasil dihapus",
+      "Photo removed successfully",
       backgroundColor: Colors.orange,
       colorText: Colors.white,
       snackPosition: SnackPosition.TOP,
@@ -335,10 +335,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   Obx(
                     () => Text(
                       _selectedImage != null
-                          ? "Foto baru dipilih"
+                          ? "New photo selected"
                           : (_authController.currentUser.value?.name != null
-                                ? "Foto profile ${_authController.currentUser.value!.name}"
-                                : "Tap untuk ubah foto"),
+                                ? "Profile photo ${_authController.currentUser.value!.name}"
+                                : "Tap to change photo"),
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.grey.shade600,
@@ -358,9 +358,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     SizedBox(height: height * 0.02),
 
                     _buildTextField(
-                      label: "Nama Lengkap",
+                      label: "Full Name",
                       controller: _nameController,
-                      hintText: _authController.currentUser.value?.name ?? "Masukkan nama lengkap",
+                      hintText: _authController.currentUser.value?.name ?? "Enter full name",
                       icon: Icons.person_outline,
                     ),
                     SizedBox(height: height * 0.025),
@@ -368,7 +368,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     _buildTextField(
                       label: "Email",
                       controller: _emailController,
-                      hintText: _authController.currentUser.value?.email ?? "Masukkan email",
+                      hintText: _authController.currentUser.value?.email ?? "Enter email",
                       icon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                     ),
@@ -410,7 +410,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             ),
                             SizedBox(width: 12),
                             Text(
-                              "Menyimpan...",
+                              "Saving...",
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -420,7 +420,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           ],
                         )
                       : Text(
-                          "Simpan Perubahan",
+                          "Save Changes",
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,

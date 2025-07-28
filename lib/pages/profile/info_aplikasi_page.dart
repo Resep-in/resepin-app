@@ -34,7 +34,7 @@ class InfoAplikasiPage extends StatelessWidget {
                   ),
                   Expanded(
                     child: Text(
-                      "Info Aplikasi",
+                      "Info Application",
                       style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
@@ -116,7 +116,7 @@ class InfoAplikasiPage extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "Resep Makanan Favorit",
+                            "Favorite Food Recipes",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: Colors.grey.shade600,
@@ -131,7 +131,7 @@ class InfoAplikasiPage extends StatelessWidget {
                     // App Info Cards
                     _buildInfoCard(
                       icon: Icons.info_outline,
-                      title: "Versi Aplikasi",
+                      title: "Application Version",
                       subtitle: "1.0.0",
                       color: Colors.blue,
                     ),
@@ -141,7 +141,7 @@ class InfoAplikasiPage extends StatelessWidget {
                     _buildInfoCard(
                       icon: Icons.code,
                       title: "Developer",
-                      subtitle: "Tim Kosongin Dulu",
+                      subtitle: "Team Kosongin Dulu",
                       color: Colors.green,
                     ),
 
@@ -149,7 +149,7 @@ class InfoAplikasiPage extends StatelessWidget {
 
                     _buildInfoCard(
                       icon: Icons.calendar_today,
-                      title: "Tanggal Pembuatan",
+                      title: "Created On",
                       subtitle: "Juli 2025",
                       color: Colors.orange,
                     ),
@@ -172,7 +172,7 @@ class InfoAplikasiPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Tentang Aplikasi",
+                            "About Resepin",
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,

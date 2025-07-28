@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -24,6 +25,8 @@ class AuthController extends GetxController {
     isLoading.value = true;
 
     try {
+      print('🔗 Attempting login to: ${RoutesApi.loginUrl()}');
+      
       final response = await http.post(
         Uri.parse(RoutesApi.loginUrl()),
         headers: {
@@ -34,7 +37,15 @@ class AuthController extends GetxController {
           'email': email,
           'password': password,
         }),
+      ).timeout(
+        Duration(seconds: 30),
+        onTimeout: () {
+          throw SocketException('Connection timeout');
+        },
       );
+
+      print('📡 Response status: ${response.statusCode}');
+      print('📡 Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -53,8 +64,8 @@ class AuthController extends GetxController {
         await AuthService.setLoginStatus(true);
 
         Get.snackbar(
-          'Login Berhasil',
-          'Selamat datang ${authResponse.user?.name ?? "User"}!',
+          'Login Successful',
+          'Welcome ${authResponse.user?.name ?? "User"}!',
           backgroundColor: Colors.green,
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP,
@@ -67,13 +78,13 @@ class AuthController extends GetxController {
       } else {
         final Map<String, dynamic> errorData = jsonDecode(response.body);
         
-        String errorMessage = 'Login gagal';
+        String errorMessage = 'Login failed';
         if (errorData['message'] != null) {
           errorMessage = errorData['message'];
         }
 
         Get.snackbar(
-          'Login Gagal',
+          'Login Failed',
           errorMessage,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -86,17 +97,55 @@ class AuthController extends GetxController {
           errors: errorData['errors'],
         );
       }
-    } catch (e) {
+    } on SocketException catch (e) {
+      print('❌ Socket Exception: $e');
+      String errorMsg = 'Unable to connect to server. Please check your internet connection.';
+      
       Get.snackbar(
-        'Error',
-        'Terjadi kesalahan koneksi. Periksa internet Anda.',
+        'Connection Failed',
+        errorMsg,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: Duration(seconds: 5),
+      );
+
+      return AuthResponse.fromError(message: errorMsg);
+    } on HttpException catch (e) {
+      print('❌ HTTP Exception: $e');
+      Get.snackbar(
+        'HTTP Error',
+        'Server is not accessible. Please try again later.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
       );
 
+      return AuthResponse.fromError(message: 'Server is not accessible');
+    } on FormatException catch (e) {
+      print('❌ Format Exception: $e');
+      Get.snackbar(
+        'Data Error',
+        'Invalid data format from server.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+
+      return AuthResponse.fromError(message: 'Invalid data format');
+    } catch (e) {
+      print('❌ General Exception: $e');
+      Get.snackbar(
+        'Error',
+        'Connection error occurred. Please check your internet connection.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: Duration(seconds: 5),
+      );
+
       return AuthResponse.fromError(
-        message: 'Terjadi kesalahan koneksi',
+        message: 'Connection error occurred',
       );
     } finally {
       isLoading.value = false;
@@ -166,27 +215,25 @@ class AuthController extends GetxController {
       if (response.statusCode == 201 || response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         
-        // Jika register berhasil, langsung login atau redirect ke login
         Get.snackbar(
-          'Register Berhasil',
-          'Akun berhasil dibuat. Silakan login.',
+          'Registration Successful',
+          'Account created successfully. Please login.',
           backgroundColor: Colors.green,
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP,
           duration: Duration(seconds: 2),
         );
 
-        // Redirect ke login page
         Get.off(() => LoginPage());
 
         return AuthResponse(
           success: true,
-          message: responseData['message'] ?? 'Register berhasil',
+          message: responseData['message'] ?? 'Registration successful',
         );
       } else {
         final Map<String, dynamic> errorData = jsonDecode(response.body);
         
-        String errorMessage = 'Register gagal';
+        String errorMessage = 'Registration failed';
         if (errorData['message'] != null) {
           errorMessage = errorData['message'];
         }
@@ -208,7 +255,7 @@ class AuthController extends GetxController {
         }
 
         Get.snackbar(
-          'Register Gagal',
+          'Registration Failed',
           errorMessage,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -224,14 +271,14 @@ class AuthController extends GetxController {
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Terjadi kesalahan koneksi. Periksa internet Anda.',
+        'Connection error occurred. Please check your internet connection.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
       );
 
       return AuthResponse.fromError(
-        message: 'Terjadi kesalahan koneksi',
+        message: 'Connection error occurred',
       );
     } finally {
       isLoading.value = false;
@@ -259,8 +306,8 @@ class AuthController extends GetxController {
       await AuthService.clearAuthData();
 
       Get.snackbar(
-        'Logout Berhasil',
-        'Anda telah keluar dari aplikasi',
+        'Logout Successful',
+        'You have been logged out of the application',
         backgroundColor: Colors.green,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -300,7 +347,7 @@ class AuthController extends GetxController {
     if (email.isEmpty || password.isEmpty) {
       Get.snackbar(
         'Error',
-        'Email dan password harus diisi',
+        'Email and password must be filled',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -311,7 +358,7 @@ class AuthController extends GetxController {
     if (!GetUtils.isEmail(email)) {
       Get.snackbar(
         'Error',
-        'Format email tidak valid',
+        'Invalid email format',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -322,7 +369,6 @@ class AuthController extends GetxController {
     return true;
   }
 
-  // Tambahkan method validasi register
   bool validateRegisterInput({
     required String name,
     required String email,
@@ -332,7 +378,7 @@ class AuthController extends GetxController {
     if (name.trim().isEmpty) {
       Get.snackbar(
         'Error',
-        'Nama harus diisi',
+        'Name must be filled',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -343,7 +389,7 @@ class AuthController extends GetxController {
     if (name.trim().length < 2) {
       Get.snackbar(
         'Error',
-        'Nama minimal 2 karakter',
+        'Name must be at least 2 characters',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -354,7 +400,7 @@ class AuthController extends GetxController {
     if (email.trim().isEmpty) {
       Get.snackbar(
         'Error',
-        'Email harus diisi',
+        'Email must be filled',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -365,7 +411,7 @@ class AuthController extends GetxController {
     if (!GetUtils.isEmail(email.trim())) {
       Get.snackbar(
         'Error',
-        'Format email tidak valid',
+        'Invalid email format',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -376,7 +422,7 @@ class AuthController extends GetxController {
     if (password.isEmpty) {
       Get.snackbar(
         'Error',
-        'Password harus diisi',
+        'Password must be filled',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -387,7 +433,7 @@ class AuthController extends GetxController {
     if (password.length < 6) {
       Get.snackbar(
         'Error',
-        'Password minimal 6 karakter',
+        'Password must be at least 6 characters',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -398,7 +444,7 @@ class AuthController extends GetxController {
     if (password != passwordConfirmation) {
       Get.snackbar(
         'Error',
-        'Konfirmasi password tidak cocok',
+        'Password confirmation does not match',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,

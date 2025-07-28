@@ -91,7 +91,7 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                   ),
                   SizedBox(width: width * 0.15),
                   Text(
-                    "Edit Password",
+                    "Change Password",
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -110,9 +110,9 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                     children: [
                       // Old Password Field
                       _buildPasswordField(
-                        label: "Password Lama",
+                        label: "Old Password",
                         controller: _oldPasswordController,
-                        hintText: "Masukkan password lama",
+                        hintText: "Enter old password",
                         obscureText: _obscureOldPassword,
                         onToggleVisibility: () {
                           setState(() {
@@ -124,9 +124,9 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                       
                       // New Password Field
                       _buildPasswordField(
-                        label: "Password Baru",
+                        label: "New Password",
                         controller: _newPasswordController,
-                        hintText: "Masukkan password baru",
+                        hintText: "Enter new password",
                         obscureText: _obscureNewPassword,
                         onToggleVisibility: () {
                           setState(() {
@@ -138,9 +138,9 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                       
                       // Confirm Password Field
                       _buildPasswordField(
-                        label: "Konfirmasi Password Baru",
+                        label: "Confirm New Password",
                         controller: _confirmPasswordController,
-                        hintText: "Konfirmasi password baru",
+                        hintText: "Confirm new password",
                         obscureText: _obscureConfirmPassword,
                         onToggleVisibility: () {
                           setState(() {
@@ -165,7 +165,7 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Persyaratan Password:",
+                              "Password Requirements:",
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -174,7 +174,7 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              "• Minimal 6 karakter\n• Harus berbeda dari password lama\n• Kombinasi huruf dan angka disarankan",
+                              "• Minimum 6 characters\n• Must be different from the old password\n• A combination of letters and numbers is recommended",
                               style: GoogleFonts.poppins(
                                 fontSize: 11,
                                 color: Colors.blue.shade700,

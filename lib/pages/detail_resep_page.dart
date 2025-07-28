@@ -78,8 +78,8 @@ class _DetailResepPageState extends State<DetailResepPage> {
         });
         
         Get.snackbar(
-          'Berhasil',
-          'Detail resep berhasil dimuat',
+          'Success',
+          'Recipe details loaded successfully',
           backgroundColor: Colors.green,
           colorText: Colors.white,
           snackPosition: SnackPosition.TOP,
@@ -101,37 +101,26 @@ class _DetailResepPageState extends State<DetailResepPage> {
     Get.dialog(
       AlertDialog(
         title: Text(
-          'Gagal Memuat Detail',
+          'Failed to Load Details',
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'Tidak dapat memuat detail resep. Silakan coba lagi atau buka resep asli.',
+          'Unable to load recipe details. Please try again or open the original recipe.',
           style: GoogleFonts.poppins(),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: Text('Tutup'),
+            child: Text('Close'),
           ),
           ElevatedButton(
             onPressed: () {
               Get.back();
               _loadFullRecipeData();
             },
-            child: Text('Coba Lagi'),
+            child: Text('Try Again'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              _launchURL(recipe.fullUrl);
-            },
-            child: Text('Buka Asli'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
             ),
           ),
@@ -207,7 +196,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
                                 ),
                                 SizedBox(width: 8),
                                 Text(
-                                  'Memuat detail...',
+                                  'Loading details...',
                                   style: GoogleFonts.poppins(
                                     fontSize: 10,
                                     color: Colors.grey.shade600,
@@ -226,10 +215,10 @@ class _DetailResepPageState extends State<DetailResepPage> {
                             await _bookmarkController!.toggleBookmark(recipe);
                             
                             Get.snackbar(
-                              _bookmarkController!.isBookmarked(recipe.id) ? "Bookmark" : "Dihapus", 
+                              _bookmarkController!.isBookmarked(recipe.id) ? "Bookmark" : "Removed", 
                               _bookmarkController!.isBookmarked(recipe.id) 
-                                  ? "Resep ditambahkan ke Bookmark" 
-                                  : "Resep dihapus dari bookmark",
+                                  ? "Recipe added to Bookmark" 
+                                  : "Recipe removed from bookmark",
                               backgroundColor: _bookmarkController!.isBookmarked(recipe.id) 
                                   ? Colors.green 
                                   : Colors.grey,
@@ -353,7 +342,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Total Bahan:",
+                            "Total Ingredients:",
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -382,7 +371,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Petunjuk Memasak:",
+                            "Cooking Instructions:",
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -395,34 +384,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
                       ),
                     ),
 
-                    SizedBox(height: height * 0.03),
-
-                    // Action Button untuk buka resep asli
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: width * 0.05),
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _launchURL(recipe.fullUrl),
-                        icon: Icon(Icons.open_in_new, size: 20),
-                        label: Text(
-                          "Buka Resep Asli",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: height * 0.03),
+                    SizedBox(height: height * 0.03), 
                   ],
                 ),
               ),
@@ -460,7 +422,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
               Expanded(
                 flex: 3,
                 child: Text(
-                  "TAKARAN",
+                  "SERVING",
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -516,7 +478,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
         Container(
           padding: EdgeInsets.all(16),
           child: Text(
-            "Tidak ada data bahan tersedia",
+            "No ingredient data available",
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.grey.shade600,
@@ -573,7 +535,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
         Container(
           padding: EdgeInsets.all(16),
           child: Text(
-            "Gagal memproses data bahan",
+            "Failed to process ingredient data",
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.grey.shade600,
@@ -678,7 +640,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            "Tidak ada petunjuk memasak tersedia. Silakan buka resep asli untuk detail lengkap.",
+            "No cooking instructions available. Please open the original recipe for full details.",
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.grey.shade600,
@@ -782,7 +744,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
       } else {
         Get.snackbar(
           'Error',
-          'Tidak dapat membuka link resep',
+          'Cannot open recipe link',
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -790,7 +752,7 @@ class _DetailResepPageState extends State<DetailResepPage> {
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Tidak dapat membuka link resep',
+        'Cannot open recipe link',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
